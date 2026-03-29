@@ -2,46 +2,71 @@
 
 ## Current State
 
-**App Status**: ✅ Exercise Library & Program Builder implemented
+**Status**: ✅ MVP Complete - All core features implemented
 
-Dark theme with neutral-900 base, neutral-800 cards, emerald-500 accent.
+The SSC Coaching App is a fully functional sprint and strength coaching platform with coach and athlete portals.
 
 ## Recently Completed
 
 - [x] Base Next.js 16 setup with App Router
-- [x] TypeScript, Tailwind CSS 4, Drizzle ORM (SQLite)
-- [x] Auth system (NextAuth credentials, coach/athlete roles)
-- [x] Database schema (users, exercises, programs, phases, sessions, blocks, logging, messaging)
-- [x] Exercise Library page (`src/app/coach/exercises/page.tsx`) - Server Component with DB fetch
-- [x] Exercise Library Client (`src/app/coach/exercises/ExerciseLibraryClient.tsx`) - CRUD, filters, search, modal form
-- [x] Programs list page (`src/app/coach/programs/page.tsx`) - Server Component with phase counts
-- [x] Program Builder page (`src/app/coach/programs/[id]/page.tsx`) - Server Component fetching full program tree
-- [x] Program Builder Client (`src/app/coach/programs/[id]/ProgramBuilderClient.tsx`) - Interactive builder with phases, weekly day columns, blocks, exercise picker
-- [x] Program server actions (`src/app/coach/programs/actions.ts`) - CRUD for programs, phases, templates, blocks, block exercises
+- [x] TypeScript configuration with strict mode
+- [x] Tailwind CSS 4 integration
+- [x] ESLint configuration
+- [x] Database schema with 19 tables (Drizzle ORM + SQLite)
+- [x] NextAuth authentication with role-based access
+- [x] Coach portal: dashboard, athletes, exercises, programs, calendar, messages, media
+- [x] Athlete portal: today view, calendar, messages, media
+- [x] Exercise library with 30 default exercises
+- [x] Program builder with phases, sessions, blocks
+- [x] Calendar-based program assignment
+- [x] Athlete logging (sets/reps/weights, sprint times)
+- [x] Readiness/wellness check-in
+- [x] In-app messaging between coach and athlete
+- [x] Media upload and gallery
 
 ## Current Structure
 
-| File/Directory | Purpose | Status |
-|----------------|---------|--------|
-| `src/db/schema.ts` | Full DB schema (Drizzle) | ✅ Ready |
-| `src/lib/auth.ts` | NextAuth config | ✅ Ready |
-| `src/components/ui/Button.tsx` | Button component | ✅ Ready |
-| `src/app/coach/exercises/page.tsx` | Exercise library (SSR) | ✅ Ready |
-| `src/app/coach/exercises/ExerciseLibraryClient.tsx` | Exercise library (client) | ✅ Ready |
-| `src/app/coach/programs/page.tsx` | Programs list (SSR) | ✅ Ready |
-| `src/app/coach/programs/actions.ts` | Program server actions | ✅ Ready |
-| `src/app/coach/programs/[id]/page.tsx` | Program builder (SSR) | ✅ Ready |
-| `src/app/coach/programs/[id]/ProgramBuilderClient.tsx` | Program builder (client) | ✅ Ready |
+| Route | Purpose | Status |
+|-------|---------|--------|
+| `/` | Landing page | ✅ |
+| `/login` | Sign in | ✅ |
+| `/register` | Create account | ✅ |
+| `/coach/dashboard` | KPI dashboard | ✅ |
+| `/coach/athletes` | Athlete roster | ✅ |
+| `/coach/athletes/[id]` | Athlete detail | ✅ |
+| `/coach/exercises` | Exercise library | ✅ |
+| `/coach/programs` | Program list | ✅ |
+| `/coach/programs/[id]` | Program builder | ✅ |
+| `/coach/calendar` | Assignment calendar | ✅ |
+| `/coach/messages` | Coach messaging | ✅ |
+| `/coach/media` | Media gallery | ✅ |
+| `/athlete/today` | Today's session | ✅ |
+| `/athlete/calendar` | Session calendar | ✅ |
+| `/athlete/messages` | Athlete messaging | ✅ |
+| `/athlete/media` | Upload media | ✅ |
 
-## Pending
+## Demo Accounts
 
-- [ ] API routes for exercise CRUD (`/api/exercises`)
-- [ ] Athlete-facing pages (view assigned programs, log workouts)
-- [ ] Dashboard charts and analytics
+| Role | Email | Password |
+|------|-------|----------|
+| Coach | coach@example.com | coach123 |
+| Athlete | marcus@example.com | athlete123 |
+| Athlete | sarah@example.com | athlete123 |
+| Athlete | james@example.com | athlete123 |
 
 ## Session History
 
 | Date | Changes |
 |------|---------|
 | Initial | Template created with base setup |
-| 2026-03-29 | Exercise library and program builder pages created |
+| 2026-03-29 | Full MVP implemented: DB schema, auth, coach portal, athlete portal, messaging, media |
+
+## Pending Improvements
+
+- [ ] Add automated tests
+- [ ] Add groups/squads management UI
+- [ ] Add password reset flow
+- [ ] Add admin interface
+- [ ] Add program cloning feature
+- [ ] Add drag-and-drop session rescheduling
+- [ ] Advanced analytics dashboards

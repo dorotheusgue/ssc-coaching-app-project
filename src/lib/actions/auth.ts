@@ -14,18 +14,18 @@ export async function loginAction(formData: FormData) {
     await nextAuthSignIn("credentials", {
       email,
       password,
-      redirect: false,
+      redirectTo: undefined,
     });
 
     const user = await db
-      .select()
+      .select({ role: users.role })
       .from(users)
       .where(eq(users.email, email))
       .get();
 
     return { success: true, role: user?.role ?? "athlete" };
   } catch {
-    return { success: false, error: "Invalid email or password" };
+    return { success: false as const, error: "Invalid email or password" };
   }
 }
 
@@ -67,11 +67,11 @@ export async function registerAction(formData: FormData) {
     await nextAuthSignIn("credentials", {
       email,
       password,
-      redirect: false,
+      redirectTo: undefined,
     });
-    return { success: true, role: user.role };
+    return { success: true };
   } catch {
-    return { success: true, role: user.role };
+    return { success: true };
   }
 }
 

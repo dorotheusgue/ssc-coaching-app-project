@@ -1,21 +1,22 @@
-# Technical Context: Next.js Starter Template
+# Technical Context: SSC Coaching App
 
 ## Technology Stack
 
-| Technology   | Version | Purpose                         |
-| ------------ | ------- | ------------------------------- |
-| Next.js      | 16.x    | React framework with App Router |
-| React        | 19.x    | UI library                      |
-| TypeScript   | 5.9.x   | Type-safe JavaScript            |
-| Tailwind CSS | 4.x     | Utility-first CSS               |
-| Bun          | Latest  | Package manager & runtime       |
+| Technology   | Version  | Purpose                         |
+| ------------ | -------- | ------------------------------- |
+| Next.js      | 16.x     | React framework with App Router |
+| React        | 19.x     | UI library                      |
+| TypeScript   | 5.9.x    | Type-safe JavaScript            |
+| Tailwind CSS | 4.x      | Utility-first CSS               |
+| Drizzle ORM  | 0.45.x   | Database ORM (SQLite)           |
+| NextAuth     | 5.0 beta | Authentication                  |
+| Bun          | Latest   | Package manager & runtime       |
+| Zod          | 4.x      | Validation                      |
+| Recharts     | 3.x      | Charts/graphs                   |
+| date-fns     | 4.x      | Date utilities                  |
+| lucide-react | 1.7.x    | Icons                           |
 
 ## Development Environment
-
-### Prerequisites
-
-- Bun installed (`curl -fsSL https://bun.sh/install | bash`)
-- Node.js 20+ (for compatibility)
 
 ### Commands
 
@@ -26,118 +27,28 @@ bun build          # Production build
 bun start          # Start production server
 bun lint           # Run ESLint
 bun typecheck      # Run TypeScript type checking
+bun db:generate    # Generate database migrations
+bun db:migrate     # Run migrations
+bun seed           # Seed database with demo data
 ```
 
-## Project Configuration
+### Demo Accounts
 
-### Next.js Config (`next.config.ts`)
+| Role   | Email               | Password    |
+| ------ | ------------------- | ----------- |
+| Coach  | coach@example.com   | coach123    |
+| Athlete| marcus@example.com  | athlete123  |
+| Athlete| sarah@example.com   | athlete123  |
+| Athlete| james@example.com   | athlete123  |
 
-- App Router enabled
-- Default settings for flexibility
+## Database
 
-### TypeScript Config (`tsconfig.json`)
+Uses SQLite via `@kilocode/app-builder-db` with Drizzle ORM. Migrations run automatically in the sandbox after push. Schema is in `src/db/schema.ts` with 19 tables covering all entities.
 
-- Strict mode enabled
-- Path alias: `@/*` → `src/*`
-- Target: ESNext
+## Security
 
-### Tailwind CSS 4 (`postcss.config.mjs`)
-
-- Uses `@tailwindcss/postcss` plugin
-- CSS-first configuration (v4 style)
-
-### ESLint (`eslint.config.mjs`)
-
-- Uses `eslint-config-next`
-- Flat config format
-
-## Key Dependencies
-
-### Production Dependencies
-
-```json
-{
-  "next": "^16.1.3", // Framework
-  "react": "^19.2.3", // UI library
-  "react-dom": "^19.2.3" // React DOM
-}
-```
-
-### Dev Dependencies
-
-```json
-{
-  "typescript": "^5.9.3",
-  "@types/node": "^24.10.2",
-  "@types/react": "^19.2.7",
-  "@types/react-dom": "^19.2.3",
-  "@tailwindcss/postcss": "^4.1.17",
-  "tailwindcss": "^4.1.17",
-  "eslint": "^9.39.1",
-  "eslint-config-next": "^16.0.0"
-}
-```
-
-## File Structure
-
-```
-/
-├── .gitignore              # Git ignore rules
-├── package.json            # Dependencies and scripts
-├── bun.lock                # Bun lockfile
-├── next.config.ts          # Next.js configuration
-├── tsconfig.json           # TypeScript configuration
-├── postcss.config.mjs      # PostCSS (Tailwind) config
-├── eslint.config.mjs       # ESLint configuration
-├── public/                 # Static assets
-│   └── .gitkeep
-└── src/                    # Source code
-    └── app/                # Next.js App Router
-        ├── layout.tsx      # Root layout
-        ├── page.tsx        # Home page
-        ├── globals.css     # Global styles
-        └── favicon.ico     # Site icon
-```
-
-## Technical Constraints
-
-### Starting Point
-
-- Minimal structure - expand as needed
-- No database by default (use recipe to add)
-- No authentication by default (add when needed)
-
-### Browser Support
-
-- Modern browsers (ES2020+)
-- No IE11 support
-
-## Performance Considerations
-
-### Image Optimization
-
-- Use Next.js `Image` component for optimization
-- Place images in `public/` directory
-
-### Bundle Size
-
-- Tree-shaking enabled by default
-- Tailwind CSS purges unused styles
-
-### Core Web Vitals
-
-- Server Components reduce client JavaScript
-- Streaming and Suspense for better UX
-
-## Deployment
-
-### Build Output
-
-- Server-rendered pages by default
-- Can be configured for static export
-
-### Environment Variables
-
-- None required for base template
-- Add as needed for features
-- Use `.env.local` for local development
+- Passwords hashed with bcrypt (cost factor 10)
+- JWT-based session tokens via NextAuth
+- Role-based access control (coach vs athlete)
+- Server-side auth checks on all protected pages
+- File uploads saved with unique names to prevent collisions

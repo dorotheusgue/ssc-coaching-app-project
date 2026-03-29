@@ -29,9 +29,10 @@ function formatDate(date: Date) {
 export default async function DashboardPage() {
   const session = await auth();
   const coachId = Number((session!.user as { id?: string }).id);
-  const today = formatDate(new Date());
+  const now = new Date();
+  const today = formatDate(now);
   const sevenDaysAgo = formatDate(
-    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
   );
 
   const [athleteCount] = await db
@@ -88,7 +89,7 @@ export default async function DashboardPage() {
     .orderBy(desc(assignedSessions.completedAt))
     .limit(5);
 
-  const weekStart = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000);
+  const weekStart = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000);
   const weeklyData = [];
   for (let i = 0; i < 7; i++) {
     const d = new Date(weekStart.getTime() + i * 24 * 60 * 60 * 1000);

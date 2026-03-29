@@ -1,120 +1,106 @@
-# System Patterns: Next.js Starter Template
+# System Patterns: SSC Coaching App
 
 ## Architecture Overview
 
 ```
 src/
-├── app/                    # Next.js App Router
-│   ├── layout.tsx          # Root layout + metadata
-│   ├── page.tsx            # Home page
-│   ├── globals.css         # Tailwind imports + global styles
-│   └── favicon.ico         # Site icon
-└── (expand as needed)
-    ├── components/         # React components (add when needed)
-    ├── lib/                # Utilities and helpers (add when needed)
-    └── db/                 # Database files (add via recipe)
+├── app/                          # Next.js App Router
+│   ├── layout.tsx                # Root layout
+│   ├── page.tsx                  # Landing page
+│   ├── login/page.tsx            # Login
+│   ├── register/page.tsx         # Register
+│   ├── api/
+│   │   ├── auth/[...nextauth]/   # NextAuth API
+│   │   ├── messages/[id]/        # Messages API
+│   │   └── upload/               # File upload API
+│   ├── coach/                    # Coach portal
+│   │   ├── layout.tsx            # Sidebar + auth guard
+│   │   ├── dashboard/            # KPI dashboard
+│   │   ├── athletes/             # Athlete management
+│   │   ├── exercises/            # Exercise library
+│   │   ├── programs/             # Program builder
+│   │   ├── calendar/             # Assignment calendar
+│   │   ├── messages/             # Messaging
+│   │   └── media/                # Media gallery
+│   └── athlete/                  # Athlete portal
+│       ├── layout.tsx            # Bottom nav + auth guard
+│       ├── today/                # Today view + logging
+│       ├── calendar/             # Session calendar
+│       ├── messages/             # Messaging
+│       └── media/                # Upload + gallery
+├── components/
+│   ├── ui/                       # Reusable UI components
+│   │   ├── Button.tsx
+│   │   ├── Card.tsx
+│   │   ├── Input.tsx
+│   │   ├── Select.tsx
+│   │   ├── Modal.tsx
+│   │   ├── Badge.tsx
+│   │   ├── Tabs.tsx
+│   │   └── Textarea.tsx
+│   └── layout/
+│       ├── Sidebar.tsx           # Coach navigation
+│       ├── AthleteNav.tsx        # Athlete bottom nav
+│       └── Header.tsx            # Top header bar
+├── lib/
+│   ├── auth.ts                   # NextAuth config
+│   ├── session.ts                # Auth helpers
+│   ├── utils.ts                  # Utility functions
+│   └── actions/                  # Server actions
+│       ├── auth.ts               # Login/register/invite
+│       └── sessions.ts           # Session queries
+├── db/
+│   ├── schema.ts                 # Drizzle schema (19 tables)
+│   ├── index.ts                  # Database client
+│   ├── migrate.ts                # Migration runner
+│   └── seed.ts                   # Seed data
 ```
 
 ## Key Design Patterns
 
-### 1. App Router Pattern
+### 1. Server Components by Default
+All page components are Server Components that fetch data directly from the database. Client components are marked with `"use client"` for interactivity (forms, state, modals).
 
-Uses Next.js App Router with file-based routing:
-```
-src/app/
-├── page.tsx           # Route: /
-├── about/page.tsx     # Route: /about
-├── blog/
-│   ├── page.tsx       # Route: /blog
-│   └── [slug]/page.tsx # Route: /blog/:slug
-└── api/
-    └── route.ts       # API Route: /api
-```
+### 2. Server Actions for Mutations
+Form submissions use Next.js Server Actions (`"use server"`) for data mutations. No separate API routes needed for most CRUD operations.
 
-### 2. Component Organization Pattern (When Expanding)
+### 3. Dual-Portal Architecture
+Coach portal (`/coach/*`) and Athlete portal (`/athlete/*`) share components but have distinct layouts:
+- Coach: Sidebar navigation (desktop), hamburger menu (mobile)
+- Athlete: Bottom navigation bar, mobile-first design
 
-```
-src/components/
-├── ui/                # Reusable UI components (Button, Card, etc.)
-├── layout/            # Layout components (Header, Footer)
-├── sections/          # Page sections (Hero, Features, etc.)
-└── forms/             # Form components
-```
+### 4. Dark Theme
+Consistent dark theme using Tailwind:
+- Background: `bg-neutral-900`
+- Cards: `bg-neutral-800`, `border-neutral-700`
+- Text: `text-white`, `text-neutral-300`, `text-neutral-400`
+- Accent: `bg-emerald-500`, `text-emerald-400`
 
-### 3. Server Components by Default
+### 5. Data Flow
+- Pages fetch data via Drizzle ORM in Server Components
+- Client components receive data as props
+- Server actions handle mutations with `revalidatePath` for cache invalidation
 
-All components are Server Components unless marked with `"use client"`:
-```tsx
-// Server Component (default) - can fetch data, access DB
-export default function Page() {
-  return <div>Server rendered</div>;
-}
+## Database Schema (19 tables)
 
-// Client Component - for interactivity
-"use client";
-export default function Counter() {
-  const [count, setCount] = useState(0);
-  return <button onClick={() => setCount(c => c + 1)}>{count}</button>;
-}
-```
-
-### 4. Layout Pattern
-
-Layouts wrap pages and can be nested:
-```tsx
-// src/app/layout.tsx - Root layout
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
-}
-
-// src/app/dashboard/layout.tsx - Nested layout
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex">
-      <Sidebar />
-      <main>{children}</main>
-    </div>
-  );
-}
-```
-
-## Styling Conventions
-
-### Tailwind CSS Usage
-- Utility classes directly on elements
-- Component composition for repeated patterns
-- Responsive: `sm:`, `md:`, `lg:`, `xl:`
-
-### Common Patterns
-```tsx
-// Container
-<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-// Responsive grid
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-// Flexbox centering
-<div className="flex items-center justify-center">
-```
-
-## File Naming Conventions
-
-- Components: PascalCase (`Button.tsx`, `Header.tsx`)
-- Utilities: camelCase (`utils.ts`, `helpers.ts`)
-- Pages/Routes: lowercase (`page.tsx`, `layout.tsx`)
-- Directories: kebab-case (`api-routes/`) or lowercase (`components/`)
-
-## State Management
-
-For simple needs:
-- `useState` for local component state
-- `useContext` for shared state
-- Server Components for data fetching
-
-For complex needs (add when necessary):
-- Zustand for client state
-- React Query for server state
+| Table | Purpose |
+|-------|---------|
+| users | Base user accounts (coach, athlete, admin) |
+| coach_profiles | Coach-specific settings |
+| athlete_profiles | Athlete-specific data, linked to coach |
+| groups | Named athlete groups |
+| group_members | Group membership |
+| exercises | Exercise library with categories and tracking types |
+| programs | Training programs |
+| phases | Program phases/blocks |
+| session_templates | Daily session templates within phases |
+| session_blocks | Block structure (warmup, sprint, strength, etc.) |
+| block_exercises | Exercises within blocks with parameters |
+| program_assignments | Program-to-athlete assignments |
+| assigned_sessions | Dated session instances |
+| set_entries | Logged strength work (sets/reps/weight) |
+| sprint_entries | Logged sprint data (distance/time) |
+| readiness_entries | Daily wellness check-ins |
+| conversations | Coach-athlete message threads |
+| messages | Individual messages |
+| media | Uploaded files (video/images) |

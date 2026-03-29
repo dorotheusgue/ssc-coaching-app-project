@@ -1,0 +1,460 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Sun,
+  Moon,
+  Zap,
+  Heart,
+  Brain,
+  CheckCircle2,
+  Circle,
+  ChevronDown,
+  ChevronUp,
+  Plus,
+  Dumbbell,
+  Timer,
+  Ruler,
+  Weight,
+} from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import {
+  saveReadinessAction,
+  logSetEntryAction,
+  logSprintEntryAction,
+  completeSessionAction,
+} from "./actions";
+
+type SessionData = {
+  id: number;
+  date: string;
+  label: string;
+  status: string;
+  notes: string | null;
+  readiness: {
+    id: number;
+    sleepQuality: number;
+    fatigue: number;
+    soreness: number;
+    stress: number;
+    mood: number;
+    note: string | null;
+  } | null;
+  blocks: Array<{
+    id: number;
+    blockType: string;
+    label: string | null;
+    sortOrder: number;
+    exercises: Array<{
+      id: number;
+      exerciseId: number | null;
+      exerciseName: string;
+      exerciseCategory: string;
+      trackingType: string;
+      sets: number | null;
+      reps: string | null;
+      load: string | null;
+      distance: number | null;
+      time: number | null;
+      restSeconds: number | null;
+      notes: string | null;
+      sortOrder: number;
+    }>;
+  }>;
+  loggedSets: Array<{
+    id: number;
+    blockExerciseId: number | null;
+    exerciseId: number | null;
+    setNumber: number;
+    reps: number | null;
+    load: number | null;
+    distance: number | null;
+    time: number | null;
+    rpe: number | null;
+    completed: boolean | null;
+  }>;
+  loggedSprints: Array<{
+    id: number;
+    blockExerciseId: number | null;
+    repNumber: number;
+    distance: number | null;
+    time: number | null;
+    rpe: number | null;
+    completed: boolean | null;
+  }>;
+};
+
+function ReadinessSlider({
+  label,
+  value,
+  onChange,
+  icon: Icon,
+  color,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Icon className={`w-4 h-4 ${color}`} />
+          <span className="text-sm text-neutral-300">{label}</span>
+        </div>
+        <span className="text-sm font-semibold text-white">{value}/10</span>
+      </div>
+      <input
+        type="range"
+        min="1"
+        max="10"
+        value={value}
+        onChange={(e) => onChange(parseInt(e.target.value))}
+        className="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+      />
+    </div>
+  );
+}
+
+function ExerciseLogCard({
+  exercise,
+  sessionId,
+  loggedSets,
+}: {
+  exercise: SessionData["blocks"][0]["exercises"][0];
+  sessionId: number;
+  loggedSets: SessionData["loggedSets"];
+}) {
+  const [expanded, setExpanded] = useState(true);
+  const [reps, setReps] = useState("");
+  const [load, setLoad] = useState("");
+  const [distance, setDistance] = useState("");
+  const [time, setTime] = useState("");
+  const [rpe, setRpe] = useState("");
+  const [isPending, startTransition] = useTransition();
+
+  const exerciseLogs = loggedSets.filter(
+    (s) => s.blockExerciseId === exercise.id
+  );
+  const completedSets = exerciseLogs.filter((s) => s.completed).length;
+
+  async function handleLogSet() {
+    const formData = new FormData();
+    formData.set("assignedSessionId", String(sessionId));
+    formData.set("blockExerciseId", String(exercise.id));
+    formData.set("exerciseId", String(exercise.exerciseId ?? ""));
+    formData.set("setNumber", String(completedSets + 1));
+    if (reps) formData.set("reps", reps);
+    if (load) formData.set("load", load);
+    if (distance) formData.set("distance", distance);
+    if (time) formData.set("time", time);
+    if (rpe) formData.set("rpe", rpe);
+    formData.set("completed", "true");
+
+    startTransition(async () => {
+      if (exercise.trackingType === "time" || exercise.trackingType === "distance") {
+        await logSprintEntryAction(formData);
+      } else {
+        await logSetEntryAction(formData);
+      }
+      setReps("");
+      setLoad("");
+      setDistance("");
+      setTime("");
+      setRpe("");
+    });
+  }
+
+  const icon = exercise.trackingType === "time" ? Timer :
+    exercise.trackingType === "distance" ? Ruler :
+    exercise.trackingType === "load" ? Weight : Dumbbell;
+  const Icon = icon;
+
+  return (
+    <div className="bg-neutral-750 rounded-lg border border-neutral-700">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-between p-4 text-left"
+      >
+        <div className="flex items-center gap-3">
+          <Icon className="w-5 h-5 text-emerald-400" />
+          <div>
+            <div className="text-white font-medium">{exercise.exerciseName}</div>
+            <div className="text-neutral-400 text-sm">
+              {exercise.sets && `${exercise.sets} sets`}
+              {exercise.reps && ` x ${exercise.reps} reps`}
+              {exercise.load && ` @ ${exercise.load}`}
+              {exercise.distance && `${exercise.distance}m`}
+              {exercise.time && `${exercise.time}s`}
+              {exercise.restSeconds && ` | ${exercise.restSeconds}s rest`}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge color={completedSets >= (exercise.sets ?? 1) ? "emerald" : "neutral"}>
+            {completedSets}/{exercise.sets ?? 1}
+          </Badge>
+          {expanded ? (
+            <ChevronUp className="w-4 h-4 text-neutral-400" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-neutral-400" />
+          )}
+        </div>
+      </button>
+      {expanded && (
+        <div className="px-4 pb-4 space-y-3">
+          {exerciseLogs.length > 0 && (
+            <div className="space-y-1">
+              {exerciseLogs.map((log, i) => (
+                <div
+                  key={log.id}
+                  className="flex items-center gap-2 text-sm text-neutral-300"
+                >
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span>Set {i + 1}:</span>
+                  {log.reps && <span>{log.reps} reps</span>}
+                  {log.load && <span>@ {log.load}</span>}
+                  {log.distance && <span>{log.distance}m</span>}
+                  {log.time && <span>{log.time}s</span>}
+                  {log.rpe && <span>RPE {log.rpe}</span>}
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {(exercise.trackingType === "reps" || exercise.trackingType === "load") && (
+              <>
+                <input
+                  type="number"
+                  placeholder="Reps"
+                  value={reps}
+                  onChange={(e) => setReps(e.target.value)}
+                  className="bg-neutral-700 border border-neutral-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                />
+                <input
+                  type="number"
+                  placeholder="Load (kg)"
+                  value={load}
+                  onChange={(e) => setLoad(e.target.value)}
+                  className="bg-neutral-700 border border-neutral-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                />
+              </>
+            )}
+            {exercise.trackingType === "distance" && (
+              <input
+                type="number"
+                placeholder="Distance (m)"
+                value={distance}
+                onChange={(e) => setDistance(e.target.value)}
+                className="bg-neutral-700 border border-neutral-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              />
+            )}
+            {exercise.trackingType === "time" && (
+              <input
+                type="number"
+                step="0.01"
+                placeholder="Time (s)"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="bg-neutral-700 border border-neutral-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              />
+            )}
+            <input
+              type="number"
+              placeholder="RPE (1-10)"
+              min="1"
+              max="10"
+              value={rpe}
+              onChange={(e) => setRpe(e.target.value)}
+              className="bg-neutral-700 border border-neutral-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            />
+          </div>
+          <Button onClick={handleLogSet} disabled={isPending} size="sm" className="w-full">
+            <Plus className="w-4 h-4 mr-1" />
+            Log Set {completedSets + 1}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function TodayClient({
+  session,
+  athleteId,
+  userName,
+  today,
+}: {
+  session: SessionData | null;
+  athleteId: number;
+  userName: string;
+  today: string;
+}) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  const [sleep, setSleep] = useState(session?.readiness?.sleepQuality ?? 7);
+  const [fatigue, setFatigue] = useState(session?.readiness?.fatigue ?? 5);
+  const [soreness, setSoreness] = useState(session?.readiness?.soreness ?? 5);
+  const [stress, setStress] = useState(session?.readiness?.stress ?? 5);
+  const [mood, setMood] = useState(session?.readiness?.mood ?? 7);
+  const [note, setNote] = useState(session?.readiness?.note ?? "");
+
+  const hasReadiness = !!session?.readiness;
+
+  async function handleSaveReadiness() {
+    const formData = new FormData();
+    formData.set("athleteId", String(athleteId));
+    formData.set("assignedSessionId", String(session?.id ?? ""));
+    formData.set("date", today);
+    formData.set("sleepQuality", String(sleep));
+    formData.set("fatigue", String(fatigue));
+    formData.set("soreness", String(soreness));
+    formData.set("stress", String(stress));
+    formData.set("mood", String(mood));
+    formData.set("note", note);
+
+    startTransition(async () => {
+      await saveReadinessAction(formData);
+      router.refresh();
+    });
+  }
+
+  async function handleCompleteSession() {
+    if (!session) return;
+    const formData = new FormData();
+    formData.set("assignedSessionId", String(session.id));
+
+    startTransition(async () => {
+      await completeSessionAction(formData);
+      router.refresh();
+    });
+  }
+
+  const greeting = new Date().getHours() < 12
+    ? "Good morning"
+    : new Date().getHours() < 17
+      ? "Good afternoon"
+      : "Good evening";
+
+  if (!session) {
+    return (
+      <div className="max-w-2xl mx-auto p-4 sm:p-6">
+        <div className="text-center py-16">
+          <Sun className="w-16 h-16 text-neutral-600 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-white mb-2">
+            {greeting}, {userName}
+          </h1>
+          <p className="text-neutral-400 mb-6">No training scheduled for today.</p>
+          <p className="text-neutral-500 text-sm">Rest and recover. Check your calendar for upcoming sessions.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-white">
+          {greeting}, {userName}
+        </h1>
+        <p className="text-neutral-400 text-sm mt-1">
+          {new Date(today + "T12:00:00").toLocaleDateString("en-US", {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+          })}
+        </p>
+      </div>
+
+      <div className="bg-neutral-800 rounded-xl border border-neutral-700 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+            <Zap className="w-5 h-5 text-yellow-400" />
+            {session.label}
+          </h2>
+          <Badge
+            color={
+              session.status === "completed"
+                ? "emerald"
+                : session.status === "in_progress"
+                  ? "yellow"
+                  : "neutral"
+            }
+          >
+            {session.status}
+          </Badge>
+        </div>
+        {session.notes && (
+          <p className="text-neutral-400 text-sm mb-4">{session.notes}</p>
+        )}
+      </div>
+
+      <Card title="Readiness Check">
+        {hasReadiness ? (
+          <div className="flex items-center gap-2 text-emerald-400">
+            <CheckCircle2 className="w-5 h-5" />
+            <span>Readiness recorded</span>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            <ReadinessSlider label="Sleep Quality" value={sleep} onChange={setSleep} icon={Moon} color="text-blue-400" />
+            <ReadinessSlider label="Energy / Fatigue" value={11 - fatigue} onChange={(v) => setFatigue(11 - v)} icon={Zap} color="text-yellow-400" />
+            <ReadinessSlider label="Muscle Soreness" value={11 - soreness} onChange={(v) => setSoreness(11 - v)} icon={Heart} color="text-red-400" />
+            <ReadinessSlider label="Stress Level" value={11 - stress} onChange={(v) => setStress(11 - v)} icon={Brain} color="text-purple-400" />
+            <ReadinessSlider label="Mood" value={mood} onChange={setMood} icon={Sun} color="text-emerald-400" />
+            <div>
+              <label className="block text-sm text-neutral-300 mb-1">Notes</label>
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={2}
+                placeholder="How are you feeling?"
+                className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+              />
+            </div>
+            <Button onClick={handleSaveReadiness} disabled={isPending} className="w-full">
+              Save Readiness
+            </Button>
+          </div>
+        )}
+      </Card>
+
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold text-white">Session</h2>
+        {session.blocks.map((block) => (
+          <div key={block.id} className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Badge color={block.blockType === "warmup" ? "yellow" : block.blockType === "sprint" ? "blue" : block.blockType === "strength" ? "emerald" : "purple"}>
+                {block.blockType}
+              </Badge>
+              {block.label && (
+                <span className="text-neutral-300 text-sm font-medium">{block.label}</span>
+              )}
+            </div>
+            {block.exercises.map((exercise) => (
+              <ExerciseLogCard
+                key={exercise.id}
+                exercise={exercise}
+                sessionId={session.id}
+                loggedSets={session.loggedSets}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+
+      {session.status !== "completed" && (
+        <Button onClick={handleCompleteSession} disabled={isPending} className="w-full" size="lg">
+          <CheckCircle2 className="w-5 h-5 mr-2" />
+          Complete Session
+        </Button>
+      )}
+    </div>
+  );
+}

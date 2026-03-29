@@ -1,44 +1,56 @@
-# Product Context: Next.js Starter Template
+# Product Context: SSC Coaching App
 
-## Why This Template Exists
+## Why This App Exists
 
-Starting a new Next.js project involves boilerplate setup, configuration decisions, and establishing patterns. This template provides a clean, opinionated starting point that eliminates setup friction and establishes best practices from the start. It's optimized for AI-assisted development, where an AI can quickly extend the template based on user requirements.
+Coaches currently use spreadsheets and generic fitness apps that don't support sprint-specific training needs. This app provides a purpose-built platform for sprint and strength & conditioning coaches, inspired by TeamBuildr's workflow but focused on speed development.
 
 ## Problems It Solves
 
-1. **Setup Time**: Eliminates boilerplate configuration (TypeScript, Tailwind, ESLint)
-2. **Decision Fatigue**: Pre-made choices for tooling and patterns
-3. **AI Context**: Memory bank provides persistent context for AI assistants
-4. **Extensibility**: Recipe system for adding common features
-5. **Consistency**: Standardized project structure and conventions
-
-## How It Should Work (User Flow)
-
-1. User starts with this template
-2. User describes what they want to build to AI assistant
-3. AI adds pages, components, and features as needed
-4. AI uses recipes for common additions (database, auth)
-5. User previews changes via hot reload
-6. Iterate until satisfied
-7. Deploy
+1. **Program Design**: Structured periodization with phases, weekly templates, and daily sessions
+2. **Delivery**: Calendar-based assignment so athletes always know what to do
+3. **Tracking**: Athletes log sets, reps, weights, and sprint times from their phone
+4. **Communication**: In-app messaging eliminates scattered email/text threads
+5. **Progress Monitoring**: Dashboard with KPIs, completion rates, and progress graphs
 
 ## Key User Experience Goals
 
-- **Zero to Feature Fast**: Get building immediately, no setup required
-- **AI-Friendly**: Memory bank and recipes make AI assistance effective
-- **Flexible Foundation**: Can become any type of application
-- **Best Practices Built-In**: TypeScript strict mode, ESLint, clean structure
+- **Coach**: Can create a full 4-week program with 3 phases in under 15 minutes
+- **Athlete**: Can log a complete session from their phone in under 5 minutes
+- **Both**: Clean, dark-themed interface that works on desktop and mobile
 
-## What This Template Provides
+## User Flows
 
-1. **Clean App Structure**: Single page ready for expansion
-2. **Type Safety**: Full TypeScript setup with strict mode
-3. **Modern Styling**: Tailwind CSS 4 ready to use
-4. **Code Quality**: ESLint configured
-5. **Extensibility**: Recipe system for common features
+### Coach Flow
+1. Login → Dashboard (KPI tiles, quick actions)
+2. Create program → Add phases → Add sessions with exercises
+3. Assign program to athlete(s) via calendar
+4. Monitor completion and progress
+5. Message athletes, review uploaded videos
 
-## Integration Points
+### Athlete Flow
+1. Login → Today view
+2. Complete readiness check-in (sleep, fatigue, soreness, stress, mood)
+3. View today's session with exercise details
+4. Log each set/rep/weight or sprint time
+5. Mark session complete
+6. View calendar, upload training videos, message coach
 
-- **Database**: Use add-database recipe for Drizzle + SQLite
-- **Styling**: Tailwind CSS pre-configured
-- **AI Assistance**: Memory bank for context persistence
+## What's Built (MVP)
+
+- [x] Authentication (login, register, role-based)
+- [x] Coach dashboard with KPI tiles
+- [x] Athlete management (list, detail, invite)
+- [x] Exercise library (30 default exercises)
+- [x] Program builder (phases, sessions, blocks)
+- [x] Calendar with program assignment
+- [x] Athlete Today view with logging
+- [x] Readiness/wellness check-in
+- [x] In-app messaging (coach ↔ athlete)
+- [x] Media upload and gallery
+
+## Future Features
+
+- Wearable integration (HRV, GPS)
+- Advanced analytics (acute:chronic workload, velocity-load profiles)
+- Multi-coach organizations
+- Payment/billing
