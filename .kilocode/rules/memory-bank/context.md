@@ -1,87 +1,47 @@
-# Active Context: Next.js Starter Template
+# Active Context: SSC Coaching App
 
 ## Current State
 
-**Template Status**: ✅ Ready for development
+**App Status**: ✅ Exercise Library & Program Builder implemented
 
-The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. It's ready for AI-assisted expansion to build any type of application.
+Dark theme with neutral-900 base, neutral-800 cards, emerald-500 accent.
 
 ## Recently Completed
 
 - [x] Base Next.js 16 setup with App Router
-- [x] TypeScript configuration with strict mode
-- [x] Tailwind CSS 4 integration
-- [x] ESLint configuration
-- [x] Memory bank documentation
-- [x] Recipe system for common features
+- [x] TypeScript, Tailwind CSS 4, Drizzle ORM (SQLite)
+- [x] Auth system (NextAuth credentials, coach/athlete roles)
+- [x] Database schema (users, exercises, programs, phases, sessions, blocks, logging, messaging)
+- [x] Exercise Library page (`src/app/coach/exercises/page.tsx`) - Server Component with DB fetch
+- [x] Exercise Library Client (`src/app/coach/exercises/ExerciseLibraryClient.tsx`) - CRUD, filters, search, modal form
+- [x] Programs list page (`src/app/coach/programs/page.tsx`) - Server Component with phase counts
+- [x] Program Builder page (`src/app/coach/programs/[id]/page.tsx`) - Server Component fetching full program tree
+- [x] Program Builder Client (`src/app/coach/programs/[id]/ProgramBuilderClient.tsx`) - Interactive builder with phases, weekly day columns, blocks, exercise picker
+- [x] Program server actions (`src/app/coach/programs/actions.ts`) - CRUD for programs, phases, templates, blocks, block exercises
 
 ## Current Structure
 
 | File/Directory | Purpose | Status |
 |----------------|---------|--------|
-| `src/app/page.tsx` | Home page | ✅ Ready |
-| `src/app/layout.tsx` | Root layout | ✅ Ready |
-| `src/app/globals.css` | Global styles | ✅ Ready |
-| `.kilocode/` | AI context & recipes | ✅ Ready |
+| `src/db/schema.ts` | Full DB schema (Drizzle) | ✅ Ready |
+| `src/lib/auth.ts` | NextAuth config | ✅ Ready |
+| `src/components/ui/Button.tsx` | Button component | ✅ Ready |
+| `src/app/coach/exercises/page.tsx` | Exercise library (SSR) | ✅ Ready |
+| `src/app/coach/exercises/ExerciseLibraryClient.tsx` | Exercise library (client) | ✅ Ready |
+| `src/app/coach/programs/page.tsx` | Programs list (SSR) | ✅ Ready |
+| `src/app/coach/programs/actions.ts` | Program server actions | ✅ Ready |
+| `src/app/coach/programs/[id]/page.tsx` | Program builder (SSR) | ✅ Ready |
+| `src/app/coach/programs/[id]/ProgramBuilderClient.tsx` | Program builder (client) | ✅ Ready |
 
-## Current Focus
+## Pending
 
-The template is ready. Next steps depend on user requirements:
-
-1. What type of application to build
-2. What features are needed
-3. Design/branding preferences
-
-## Quick Start Guide
-
-### To add a new page:
-
-Create a file at `src/app/[route]/page.tsx`:
-```tsx
-export default function NewPage() {
-  return <div>New page content</div>;
-}
-```
-
-### To add components:
-
-Create `src/components/` directory and add components:
-```tsx
-// src/components/ui/Button.tsx
-export function Button({ children }: { children: React.ReactNode }) {
-  return <button className="px-4 py-2 bg-blue-600 text-white rounded">{children}</button>;
-}
-```
-
-### To add a database:
-
-Follow `.kilocode/recipes/add-database.md`
-
-### To add API routes:
-
-Create `src/app/api/[route]/route.ts`:
-```tsx
-import { NextResponse } from "next/server";
-
-export async function GET() {
-  return NextResponse.json({ message: "Hello" });
-}
-```
-
-## Available Recipes
-
-| Recipe | File | Use Case |
-|--------|------|----------|
-| Add Database | `.kilocode/recipes/add-database.md` | Data persistence with Drizzle + SQLite |
-
-## Pending Improvements
-
-- [ ] Add more recipes (auth, email, etc.)
-- [ ] Add example components
-- [ ] Add testing setup recipe
+- [ ] API routes for exercise CRUD (`/api/exercises`)
+- [ ] Athlete-facing pages (view assigned programs, log workouts)
+- [ ] Dashboard charts and analytics
 
 ## Session History
 
 | Date | Changes |
 |------|---------|
 | Initial | Template created with base setup |
+| 2026-03-29 | Exercise library and program builder pages created |
