@@ -19,39 +19,41 @@ export default function RegisterPage() {
     setError("");
     setLoading(true);
 
-    const formData = new FormData();
-    formData.set("name", name);
-    formData.set("email", email);
-    formData.set("password", password);
-    formData.set("role", role);
+    try {
+      const { registerAction } = await import("@/lib/actions/auth");
+      const formData = new FormData();
+      formData.set("name", name);
+      formData.set("email", email);
+      formData.set("password", password);
+      formData.set("role", role);
 
-    const { registerAction } = await import("@/lib/actions/auth");
-    const result = await registerAction(formData);
+      const result = await registerAction(formData);
 
-    if (!result.success) {
-      setError(result.error ?? "Registration failed");
+      if (!result.success) {
+        setError(result.error ?? "Registration failed");
+        setLoading(false);
+        return;
+      }
+
+      const signInResult = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (signInResult?.error) {
+        setError("Account created but login failed. Please sign in.");
+        setLoading(false);
+        return;
+      }
+
+      router.push("/");
+      router.refresh();
+    } catch (err) {
+      console.error("Register error:", err);
+      setError("Something went wrong");
       setLoading(false);
-      return;
     }
-
-    const signInResult = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
-
-    if (signInResult?.error) {
-      setError("Account created but login failed. Please sign in.");
-      setLoading(false);
-      return;
-    }
-
-    if (role === "coach") {
-      router.push("/coach/dashboard");
-    } else {
-      router.push("/athlete/today");
-    }
-    router.refresh();
   }
 
   return (

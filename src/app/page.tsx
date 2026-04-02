@@ -1,6 +1,19 @@
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+
+  if (session?.user) {
+    const role = (session.user as { role?: string }).role;
+    if (role === "coach") {
+      redirect("/coach/dashboard");
+    } else {
+      redirect("/athlete/today");
+    }
+  }
+
   return (
     <main className="min-h-screen bg-neutral-900 flex flex-col items-center justify-center px-4">
       <div className="text-center space-y-8 max-w-lg">

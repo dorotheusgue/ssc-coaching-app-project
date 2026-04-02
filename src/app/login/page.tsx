@@ -30,17 +30,12 @@ export default function LoginPage() {
         return;
       }
 
-      const res = await fetch("/api/auth/session");
-      const session = await res.json();
-      const role = session?.user?.role;
-
-      if (role === "coach") {
-        router.push("/coach/dashboard");
-      } else {
-        router.push("/athlete/today");
+      if (result?.ok) {
+        router.push("/");
+        router.refresh();
       }
-      router.refresh();
-    } catch {
+    } catch (err) {
+      console.error("Login error:", err);
       setError("Something went wrong");
       setLoading(false);
     }
