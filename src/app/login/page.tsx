@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { loginAction } from "@/lib/actions/auth";
+import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,22 +17,32 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    const formData = new FormData();
-    formData.set("email", email);
-    formData.set("password", password);
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
-    const result = await loginAction(formData);
+      if (result?.error) {
+        setError("Invalid email or password");
+        setLoading(false);
+        return;
+      }
 
-    if (!result.success) {
-      setError(result.error ?? "Login failed");
+      const res = await fetch("/api/auth/session");
+      const session = await res.json();
+      const role = session?.user?.role;
+
+      if (role === "coach") {
+        router.push("/coach/dashboard");
+      } else {
+        router.push("/athlete/today");
+      }
+      router.refresh();
+    } catch {
+      setError("Something went wrong");
       setLoading(false);
-      return;
-    }
-
-    if (result.role === "coach") {
-      router.push("/coach/dashboard");
-    } else {
-      router.push("/athlete/today");
     }
   }
 

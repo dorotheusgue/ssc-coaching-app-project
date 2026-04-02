@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { registerAction } from "@/lib/actions/auth";
+import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -25,10 +25,23 @@ export default function RegisterPage() {
     formData.set("password", password);
     formData.set("role", role);
 
+    const { registerAction } = await import("@/lib/actions/auth");
     const result = await registerAction(formData);
 
     if (!result.success) {
       setError(result.error ?? "Registration failed");
+      setLoading(false);
+      return;
+    }
+
+    const signInResult = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    if (signInResult?.error) {
+      setError("Account created but login failed. Please sign in.");
       setLoading(false);
       return;
     }
@@ -38,6 +51,7 @@ export default function RegisterPage() {
     } else {
       router.push("/athlete/today");
     }
+    router.refresh();
   }
 
   return (
