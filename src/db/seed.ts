@@ -1,14 +1,25 @@
 import { db } from "./index";
 import { users, exercises, coachProfiles, athleteProfiles } from "./schema";
+import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 async function seed() {
   console.log("Seeding database...");
 
+  const existingCoach = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, "coach@example.com"))
+    .get();
+
+  if (existingCoach) {
+    console.log("Seed already applied — skipping.");
+    return;
+  }
+
   const coachPassword = await bcrypt.hash("coach123", 10);
   const athletePassword = await bcrypt.hash("athlete123", 10);
 
-  // Create coach user
   const [coach] = await db
     .insert(users)
     .values({
@@ -19,7 +30,6 @@ async function seed() {
     })
     .returning();
 
-  // Create coach profile
   await db.insert(coachProfiles).values({
     userId: coach.id,
     organization: "Elite Speed Academy",
@@ -27,7 +37,6 @@ async function seed() {
     bio: "15 years coaching experience with elite sprinters.",
   });
 
-  // Create athlete users
   const [athlete1] = await db
     .insert(users)
     .values({
@@ -82,7 +91,6 @@ async function seed() {
     },
   ]);
 
-  // Seed default exercises
   const defaultExercises = [
     // Sprint
     { name: "30m Sprint", category: "sprint" as const, tags: ["acceleration"], trackingType: "time" as const, isDefault: true, description: "Full 30m sprint from blocks or standing start." },
@@ -134,4 +142,7 @@ async function seed() {
   console.log(`Athletes: marcus@example.com, sarah@example.com, james@example.com / athlete123`);
 }
 
-seed().catch(console.error);
+seed().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
