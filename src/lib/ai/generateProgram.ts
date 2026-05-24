@@ -155,8 +155,8 @@ export async function generateProgramFromPromptAction(
   if (trimmedPrompt.length < 10) {
     return { success: false, error: "Prompt is too short. Describe what you want." };
   }
-  if (trimmedPrompt.length > 4000) {
-    return { success: false, error: "Prompt is too long (max 4000 chars)." };
+  if (trimmedPrompt.length > 50000) {
+    return { success: false, error: "Prompt is too long (max 50,000 chars)." };
   }
 
   const availableExercises = await db
@@ -197,18 +197,22 @@ export async function generateProgramFromPromptAction(
     )
     .join("\n");
 
-  const systemInstruction = `You are an expert sprint and S&C coach designing a periodized training program. You output structured plans that fit a specific data model.
+  const systemInstruction = `You are an expert sprint and S&C coach. You convert user input into a structured training plan that fits a specific data model.
 
-CONSTRAINTS — these are hard rules, violating any of them means the plan is invalid:
-1. Use ONLY exercises from the EXERCISE LIBRARY below. Match names EXACTLY as written.
+You will handle two modes of input automatically:
+- MODE A — "Design a new program": the user describes goals/structure in their own words. You design the periodized plan from scratch.
+- MODE B — "Parse this existing program": the user pastes or uploads an existing program (often as markdown with headings for weeks/days, lists of exercises with sets/reps/loads). You faithfully transcribe it into the schema, preserving the author's structure, exercise selection, intensities, and weekly layout. Do not invent extra weeks, sessions, or exercises in this mode.
+
+CONSTRAINTS — hard rules in both modes:
+1. Use ONLY exercises from the EXERCISE LIBRARY below. Match names EXACTLY as written. If an exercise in the input doesn't match, pick the closest library match by movement/category; if there is no reasonable match, omit it (do not invent).
 2. Generate AT MOST 12 weeks total across all phases in one call.
 3. dayOfWeek is 1-7 where 1=Monday, 7=Sunday. Each session occupies one day per week of its phase.
 4. blockType must be one of: warmup, sprint, strength, accessory, notes.
 5. Each block contains exercises that fit its blockType (warmups in warmup blocks, lifts in strength blocks, etc.).
 6. For sprint/distance exercises, use "distance" (meters) and "time" (seconds) fields when relevant.
 7. For strength exercises, use "sets", "reps" (as string like "5" or "3-5"), and "load" (as string like "80kg" or "BW") or "percent1RM".
-8. Always include a warmup block as the first block of each session.
-9. Use realistic, periodized loading. Vary intensity across the week.
+8. Always include a warmup block as the first block of each session unless the source explicitly has none.
+9. In MODE A use realistic, periodized loading and vary intensity across the week. In MODE B preserve exactly what the source specifies.
 10. Existing program already has ${existingPhases.length} phase(s); your phases must start at week ${baseWeekOffset + 1} or later.
 
 EXERCISE LIBRARY (use these names verbatim):
