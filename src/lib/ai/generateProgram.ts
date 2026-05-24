@@ -153,10 +153,10 @@ export async function generateProgramFromPromptAction(
 
   const trimmedPrompt = userPrompt.trim();
   if (trimmedPrompt.length < 10) {
-    return { success: false, error: "Prompt is too short. Describe what you want." };
+    return { success: false, error: "Input is too short. Upload a file or paste a program." };
   }
-  if (trimmedPrompt.length > 50000) {
-    return { success: false, error: "Prompt is too long (max 50,000 chars)." };
+  if (trimmedPrompt.length > 200000) {
+    return { success: false, error: "Input is too long (max 200,000 chars)." };
   }
 
   const availableExercises = await db
@@ -197,23 +197,18 @@ export async function generateProgramFromPromptAction(
     )
     .join("\n");
 
-  const systemInstruction = `You are an expert sprint and S&C coach. You convert user input into a structured training plan that fits a specific data model.
+  const systemInstruction = `You transcribe existing strength & conditioning programs into a structured schema. You DO NOT design programs from scratch or invent content. You take the user's program (typically pasted/uploaded markdown with weeks, days, blocks, exercises, sets/reps/loads) and faithfully convert it into the data model below.
 
-You will handle two modes of input automatically:
-- MODE A — "Design a new program": the user describes goals/structure in their own words. You design the periodized plan from scratch.
-- MODE B — "Parse this existing program": the user pastes or uploads an existing program (often as markdown with headings for weeks/days, lists of exercises with sets/reps/loads). You faithfully transcribe it into the schema, preserving the author's structure, exercise selection, intensities, and weekly layout. Do not invent extra weeks, sessions, or exercises in this mode.
-
-CONSTRAINTS — hard rules in both modes:
-1. Use ONLY exercises from the EXERCISE LIBRARY below. Match names EXACTLY as written. If an exercise in the input doesn't match, pick the closest library match by movement/category; if there is no reasonable match, omit it (do not invent).
-2. Generate AT MOST 12 weeks total across all phases in one call.
-3. dayOfWeek is 1-7 where 1=Monday, 7=Sunday. Each session occupies one day per week of its phase.
-4. blockType must be one of: warmup, sprint, strength, accessory, notes.
-5. Each block contains exercises that fit its blockType (warmups in warmup blocks, lifts in strength blocks, etc.).
-6. For sprint/distance exercises, use "distance" (meters) and "time" (seconds) fields when relevant.
-7. For strength exercises, use "sets", "reps" (as string like "5" or "3-5"), and "load" (as string like "80kg" or "BW") or "percent1RM".
-8. Always include a warmup block as the first block of each session unless the source explicitly has none.
-9. In MODE A use realistic, periodized loading and vary intensity across the week. In MODE B preserve exactly what the source specifies.
-10. Existing program already has ${existingPhases.length} phase(s); your phases must start at week ${baseWeekOffset + 1} or later.
+CONSTRAINTS — hard rules:
+1. Transcribe ONLY what is in the source. Do not invent weeks, sessions, blocks, or exercises that aren't there. If the source is vague on a value (e.g. no rest time given), leave that field unset rather than guess.
+2. Use ONLY exercises from the EXERCISE LIBRARY below. Match names EXACTLY as written. If a source exercise doesn't appear in the library, pick the closest match by movement pattern and category; if there is no reasonable match, omit that line (the system will report it as skipped).
+3. Generate AT MOST 12 weeks total across all phases in one call. If the source is longer, transcribe the first 12 weeks and stop.
+4. dayOfWeek is 1-7 where 1=Monday, 7=Sunday. Each session occupies one day per week of its phase.
+5. blockType must be one of: warmup, sprint, strength, accessory, notes. Group exercises into blocks that fit their type (warmups in warmup, lifts in strength, etc.).
+6. For sprint/distance exercises, populate "distance" (meters) and "time" (seconds) when given.
+7. For strength exercises, populate "sets", "reps" (string like "5" or "3-5"), and either "load" (string like "80kg" or "BW") or "percent1RM" (number).
+8. Preserve the source's weekly layout, exercise order, sets, reps, and intensities exactly.
+9. The current program already has ${existingPhases.length} phase(s); your phases must start at week ${baseWeekOffset + 1} or later.
 
 EXERCISE LIBRARY (use these names verbatim):
 ${exerciseLines}`;
