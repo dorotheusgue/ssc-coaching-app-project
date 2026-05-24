@@ -96,6 +96,8 @@ export const sessionTemplates = sqliteTable("session_templates", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   phaseId: integer("phase_id").notNull().references(() => phases.id),
   dayOfWeek: integer("day_of_week").notNull(),
+  // 0 = every week of the phase (replay); 1+ = only that specific week
+  week: integer("week").notNull().default(0),
   label: text("label").notNull(),
   sortOrder: integer("sort_order").notNull().default(0),
   notes: text("notes"),

@@ -126,6 +126,7 @@ export async function deletePhase(id: number) {
 export async function createSessionTemplate(data: {
   phaseId: number;
   dayOfWeek: number;
+  week?: number;
   label: string;
   sortOrder?: number;
   notes?: string;
@@ -138,6 +139,7 @@ export async function createSessionTemplate(data: {
     .values({
       phaseId: data.phaseId,
       dayOfWeek: data.dayOfWeek,
+      week: data.week ?? 0,
       label: data.label,
       sortOrder: data.sortOrder ?? 0,
       notes: data.notes ?? null,
@@ -149,7 +151,7 @@ export async function createSessionTemplate(data: {
 
 export async function updateSessionTemplate(
   id: number,
-  data: { dayOfWeek?: number; label?: string; sortOrder?: number; notes?: string }
+  data: { dayOfWeek?: number; week?: number; label?: string; sortOrder?: number; notes?: string }
 ) {
   const session = await auth();
   if (!session?.user) throw new Error("Unauthorized");
@@ -247,4 +249,29 @@ export async function removeExerciseFromBlock(id: number) {
   if (!session?.user) throw new Error("Unauthorized");
 
   await db.delete(blockExercises).where(eq(blockExercises.id, id));
+}
+
+export async function updateBlockExercise(
+  id: number,
+  data: {
+    sets?: number | null;
+    reps?: string | null;
+    load?: string | null;
+    percent1RM?: number | null;
+    distance?: number | null;
+    time?: number | null;
+    restSeconds?: number | null;
+    notes?: string | null;
+  }
+) {
+  const session = await auth();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  const [updated] = await db
+    .update(blockExercises)
+    .set(data)
+    .where(eq(blockExercises.id, id))
+    .returning();
+
+  return updated;
 }

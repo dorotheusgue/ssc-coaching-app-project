@@ -49,14 +49,23 @@ export async function assignProgramAction(formData: FormData) {
       .where(eq(sessionTemplates.phaseId, phase.id))
       .orderBy(sessionTemplates.sortOrder);
 
-    // dayOfWeek is 1-7 (Mon-Sun). Templates define one week; repeat them
-    // across every week of the phase (startWeek..endWeek inclusive).
+    // Templates with week=0 replay across every week of the phase
+    // (startWeek..endWeek). Templates with week>=1 are placed only on
+    // that specific phase-relative week.
     const startWeek = Math.max(1, phase.startWeek);
     const endWeek = Math.max(startWeek, phase.endWeek);
 
-    for (let week = startWeek; week <= endWeek; week++) {
-      for (const template of templates) {
-        const dayInWeek = Math.min(7, Math.max(1, template.dayOfWeek));
+    for (const template of templates) {
+      const dayInWeek = Math.min(7, Math.max(1, template.dayOfWeek));
+      const weeksForTemplate =
+        template.week === 0
+          ? Array.from(
+              { length: endWeek - startWeek + 1 },
+              (_, i) => startWeek + i
+            )
+          : [startWeek + template.week - 1].filter((w) => w <= endWeek);
+
+      for (const week of weeksForTemplate) {
         const offsetDays = (week - 1) * 7 + (dayInWeek - 1);
         const sessionDate = addDays(startDate, offsetDays);
 

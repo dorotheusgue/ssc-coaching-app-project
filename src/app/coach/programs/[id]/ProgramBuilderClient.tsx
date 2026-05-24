@@ -1,37 +1,32 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import {
   Plus,
-  ChevronDown,
-  ChevronRight,
   Trash2,
   Pencil,
   X,
   Search,
-  Dumbbell,
-  Timer,
-  Ruler,
-  Repeat,
-  GripVertical,
+  StickyNote,
   Save,
   Sparkles,
   Upload,
 } from "lucide-react";
+import { Modal } from "@/components/ui/Modal";
 import {
   createPhase,
   updatePhase,
   deletePhase,
   createSessionTemplate,
-  updateSessionTemplate,
   deleteSessionTemplate,
   createSessionBlock,
   deleteSessionBlock,
   addExerciseToBlock,
   removeExerciseFromBlock,
   updateProgram,
+  updateBlockExercise,
 } from "../actions";
 import { generateProgramFromPromptAction } from "@/lib/ai/generateProgram";
 
@@ -58,6 +53,7 @@ type SessionTemplate = {
   id: number;
   phaseId: number;
   dayOfWeek: number;
+  week: number;
   label: string;
   sortOrder: number;
   notes: string | null;
@@ -134,9 +130,6 @@ export default function ProgramBuilderClient({
   const [templates, setTemplates] = useState<SessionTemplate[]>(initialTemplates);
   const [blocks, setBlocks] = useState<SessionBlock[]>(initialBlocks);
   const [blockExercises, setBlockExercises] = useState<BlockExercise[]>(initialBlockExercises);
-  const [expandedPhases, setExpandedPhases] = useState<Set<number>>(
-    new Set(initialPhases.map((p) => p.id))
-  );
   const [editingProgram, setEditingProgram] = useState(false);
   const [editProgramName, setEditProgramName] = useState(program.name);
   const [editProgramDesc, setEditProgramDesc] = useState(program.description ?? "");
@@ -148,7 +141,14 @@ export default function ProgramBuilderClient({
   const [activePhaseId, setActivePhaseId] = useState<number | null>(
     initialPhases[0]?.id ?? null
   );
+  // Selected week tab per phase. 0 = "All weeks" (replays across phase).
+  const [activeWeekByPhase, setActiveWeekByPhase] = useState<
+    Record<number, number>
+  >({});
   const [addingBlockTo, setAddingBlockTo] = useState<number | null>(null);
+  const [editingExerciseId, setEditingExerciseId] = useState<number | null>(
+    null
+  );
   const router = useRouter();
   const [aiOpen, setAiOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
@@ -213,15 +213,6 @@ export default function ProgramBuilderClient({
     }
   };
 
-  const togglePhase = (phaseId: number) => {
-    setExpandedPhases((prev) => {
-      const next = new Set(prev);
-      if (next.has(phaseId)) next.delete(phaseId);
-      else next.add(phaseId);
-      return next;
-    });
-  };
-
   const handleSaveProgram = async () => {
     await updateProgram(program.id, {
       name: editProgramName,
@@ -246,7 +237,6 @@ export default function ProgramBuilderClient({
       sortOrder: phases.length,
     });
     setPhases((prev) => [...prev, phase]);
-    setExpandedPhases((prev) => new Set(prev).add(phase.id));
     setActivePhaseId(phase.id);
   };
 
@@ -270,11 +260,16 @@ export default function ProgramBuilderClient({
     );
   };
 
-  const handleAddSession = async (phaseId: number, dayOfWeek: number) => {
+  const handleAddSession = async (
+    phaseId: number,
+    dayOfWeek: number,
+    week: number
+  ) => {
     const phaseTemplates = templates.filter((t) => t.phaseId === phaseId);
     const template = await createSessionTemplate({
       phaseId,
       dayOfWeek,
+      week,
       label: DAY_NAMES[dayOfWeek - 1],
       sortOrder: phaseTemplates.length,
     });
@@ -339,12 +334,44 @@ export default function ProgramBuilderClient({
     setBlockExercises((prev) => prev.filter((be) => be.id !== blockExerciseId));
   };
 
+  const handleSaveExercise = async (
+    id: number,
+    data: {
+      sets: number | null;
+      reps: string | null;
+      load: string | null;
+      distance: number | null;
+      time: number | null;
+      restSeconds: number | null;
+      notes: string | null;
+    }
+  ) => {
+    await updateBlockExercise(id, data);
+    setBlockExercises((prev) =>
+      prev.map((be) => (be.id === id ? { ...be, ...data } : be))
+    );
+    setEditingExerciseId(null);
+  };
+
+  const editingExercise =
+    editingExerciseId !== null
+      ? blockExercises.find((be) => be.id === editingExerciseId) ?? null
+      : null;
+
   const activePhase = phases.find((p) => p.id === activePhaseId);
   const weekCount = activePhase
     ? activePhase.endWeek - activePhase.startWeek + 1
     : 0;
+  // Default to "All weeks" (0) for newly visited phases.
+  const activeWeek =
+    activePhase && activeWeekByPhase[activePhase.id] !== undefined
+      ? activeWeekByPhase[activePhase.id]
+      : 0;
   const phaseTemplates = templates.filter(
     (t) => t.phaseId === activePhaseId
+  );
+  const visibleTemplates = phaseTemplates.filter(
+    (t) => t.week === activeWeek
   );
 
   const filteredExercises = allExercises.filter(
@@ -567,7 +594,14 @@ export default function ProgramBuilderClient({
             <PhaseView
               phase={activePhase}
               weekCount={weekCount}
-              phaseTemplates={phaseTemplates}
+              activeWeek={activeWeek}
+              onSelectWeek={(w) =>
+                setActiveWeekByPhase((prev) => ({
+                  ...prev,
+                  [activePhase.id]: w,
+                }))
+              }
+              phaseTemplates={visibleTemplates}
               blocks={blocks}
               blockExercises={blockExercises}
               onAddSession={handleAddSession}
@@ -580,6 +614,7 @@ export default function ProgramBuilderClient({
                 setExercisePicker({ blockId })
               }
               onRemoveExercise={handleRemoveExercise}
+              onEditExercise={(id: number) => setEditingExerciseId(id)}
               addingBlockTo={addingBlockTo}
               onAddBlockType={handleAddBlock}
               onCancelAddBlock={() => setAddingBlockTo(null)}
@@ -632,13 +667,197 @@ export default function ProgramBuilderClient({
           </div>
         </div>
       )}
+
+      {editingExercise && (
+        <ExerciseEditModal
+          key={editingExercise.id}
+          blockExercise={editingExercise}
+          onClose={() => setEditingExerciseId(null)}
+          onSave={handleSaveExercise}
+        />
+      )}
     </div>
+  );
+}
+
+function ExerciseEditModal({
+  blockExercise,
+  onClose,
+  onSave,
+}: {
+  blockExercise: BlockExercise;
+  onClose: () => void;
+  onSave: (
+    id: number,
+    data: {
+      sets: number | null;
+      reps: string | null;
+      load: string | null;
+      distance: number | null;
+      time: number | null;
+      restSeconds: number | null;
+      notes: string | null;
+    }
+  ) => Promise<void>;
+}) {
+  const [sets, setSets] = useState<string>(
+    blockExercise.sets?.toString() ?? ""
+  );
+  const [reps, setReps] = useState<string>(blockExercise.reps ?? "");
+  const [load, setLoad] = useState<string>(blockExercise.load ?? "");
+  const [distance, setDistance] = useState<string>(
+    blockExercise.distance?.toString() ?? ""
+  );
+  const [time, setTime] = useState<string>(
+    blockExercise.time?.toString() ?? ""
+  );
+  const [restSeconds, setRestSeconds] = useState<string>(
+    blockExercise.restSeconds?.toString() ?? ""
+  );
+  const [notes, setNotes] = useState<string>(blockExercise.notes ?? "");
+  const [saving, setSaving] = useState(false);
+
+  const parseNum = (s: string): number | null => {
+    const t = s.trim();
+    if (!t) return null;
+    const n = Number(t);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await onSave(blockExercise.id, {
+        sets: parseNum(sets),
+        reps: reps.trim() || null,
+        load: load.trim() || null,
+        distance: parseNum(distance),
+        time: parseNum(time),
+        restSeconds: parseNum(restSeconds),
+        notes: notes.trim() || null,
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal
+      open={true}
+      onClose={onClose}
+      title={blockExercise.exerciseName ?? "Edit Exercise"}
+    >
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-neutral-400 mb-1">
+              Sets
+            </label>
+            <input
+              type="number"
+              min={0}
+              value={sets}
+              onChange={(e) => setSets(e.target.value)}
+              className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-neutral-400 mb-1">
+              Reps
+            </label>
+            <input
+              type="text"
+              value={reps}
+              onChange={(e) => setReps(e.target.value)}
+              placeholder="5 or 3-5"
+              className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-neutral-400 mb-1">
+              Load
+            </label>
+            <input
+              type="text"
+              value={load}
+              onChange={(e) => setLoad(e.target.value)}
+              placeholder="80kg, BW, RPE 8"
+              className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-neutral-400 mb-1">
+              Rest (sec)
+            </label>
+            <input
+              type="number"
+              min={0}
+              value={restSeconds}
+              onChange={(e) => setRestSeconds(e.target.value)}
+              className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-neutral-400 mb-1">
+              Distance (m)
+            </label>
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              value={distance}
+              onChange={(e) => setDistance(e.target.value)}
+              className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-neutral-400 mb-1">
+              Time (sec)
+            </label>
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-neutral-400 mb-1 flex items-center gap-1.5">
+            <StickyNote className="w-3.5 h-3.5" />
+            Notes
+          </label>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={4}
+            placeholder="Coaching cues, intent, regressions..."
+            className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-y"
+          />
+        </div>
+
+        <div className="flex justify-end gap-2 pt-2">
+          <Button variant="ghost" onClick={onClose} disabled={saving}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave} disabled={saving}>
+            <Save className="w-4 h-4 mr-2" />
+            {saving ? "Saving..." : "Save"}
+          </Button>
+        </div>
+      </div>
+    </Modal>
   );
 }
 
 function PhaseView({
   phase,
   weekCount,
+  activeWeek,
+  onSelectWeek,
   phaseTemplates,
   blocks,
   blockExercises,
@@ -650,16 +869,19 @@ function PhaseView({
   onUpdatePhase,
   onOpenExercisePicker,
   onRemoveExercise,
+  onEditExercise,
   addingBlockTo,
   onAddBlockType,
   onCancelAddBlock,
 }: {
   phase: Phase;
   weekCount: number;
+  activeWeek: number;
+  onSelectWeek: (week: number) => void;
   phaseTemplates: SessionTemplate[];
   blocks: SessionBlock[];
   blockExercises: BlockExercise[];
-  onAddSession: (phaseId: number, day: number) => void;
+  onAddSession: (phaseId: number, day: number, week: number) => void;
   onDeleteSession: (templateId: number) => void;
   onAddBlock: (templateId: number) => void;
   onDeleteBlock: (blockId: number) => void;
@@ -670,6 +892,7 @@ function PhaseView({
   ) => void;
   onOpenExercisePicker: (blockId: number) => void;
   onRemoveExercise: (blockExerciseId: number) => void;
+  onEditExercise: (blockExerciseId: number) => void;
   addingBlockTo: number | null;
   onAddBlockType: (templateId: number, blockType: string) => void;
   onCancelAddBlock: () => void;
@@ -759,6 +982,34 @@ function PhaseView({
         )}
       </div>
 
+      <div className="px-4 py-3 border-b border-neutral-700 flex items-center gap-2 overflow-x-auto">
+        <span className="text-xs text-neutral-500 mr-1">View:</span>
+        <button
+          onClick={() => onSelectWeek(0)}
+          className={`px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
+            activeWeek === 0
+              ? "bg-emerald-500 text-white"
+              : "bg-neutral-700 text-neutral-300 hover:text-white hover:bg-neutral-600"
+          }`}
+          title="Sessions that repeat across every week of this phase"
+        >
+          All weeks
+        </button>
+        {Array.from({ length: weekCount }, (_, i) => i + 1).map((w) => (
+          <button
+            key={w}
+            onClick={() => onSelectWeek(w)}
+            className={`px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
+              activeWeek === w
+                ? "bg-emerald-500 text-white"
+                : "bg-neutral-700 text-neutral-300 hover:text-white hover:bg-neutral-600"
+            }`}
+          >
+            Week {w}
+          </button>
+        ))}
+      </div>
+
       <div className="overflow-x-auto">
         <div className="grid grid-cols-7 gap-px bg-neutral-700/50 min-w-[900px]">
           {DAY_NAMES.map((day, i) => {
@@ -774,7 +1025,7 @@ function PhaseView({
                     {day}
                   </span>
                   <button
-                    onClick={() => onAddSession(phase.id, dayNum)}
+                    onClick={() => onAddSession(phase.id, dayNum, activeWeek)}
                     className="p-1 rounded hover:bg-neutral-700 text-neutral-500 hover:text-white transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5" />
@@ -838,17 +1089,31 @@ function PhaseView({
                                 {bExercises.map((be) => (
                                   <div
                                     key={be.id}
-                                    className="flex items-center justify-between py-1 group"
+                                    className="flex items-center justify-between py-1 group gap-1"
                                   >
-                                    <span className="text-xs text-neutral-200 truncate">
-                                      {be.exerciseName ?? "Unknown"}
-                                      {be.sets && (
+                                    <button
+                                      onClick={() => onEditExercise(be.id)}
+                                      className="flex-1 min-w-0 text-left text-xs text-neutral-200 truncate hover:text-white transition-colors cursor-pointer"
+                                      title="Edit sets, reps, rest, notes"
+                                    >
+                                      <span className="truncate">
+                                        {be.exerciseName ?? "Unknown"}
+                                      </span>
+                                      {(be.sets || be.reps) && (
                                         <span className="text-neutral-500 ml-1">
-                                          {be.sets}×
-                                          {be.reps ?? "?"}
+                                          {be.sets ?? "?"}×{be.reps ?? "?"}
                                         </span>
                                       )}
-                                    </span>
+                                    </button>
+                                    {be.notes && (
+                                      <button
+                                        onClick={() => onEditExercise(be.id)}
+                                        className="p-0.5 rounded text-amber-400 hover:bg-neutral-700 transition-colors"
+                                        title={be.notes}
+                                      >
+                                        <StickyNote className="w-3 h-3" />
+                                      </button>
+                                    )}
                                     <button
                                       onClick={() =>
                                         onRemoveExercise(be.id)
@@ -908,7 +1173,7 @@ function PhaseView({
 
                   {dayTemplates.length === 0 && (
                     <button
-                      onClick={() => onAddSession(phase.id, dayNum)}
+                      onClick={() => onAddSession(phase.id, dayNum, activeWeek)}
                       className="w-full text-center py-3 text-xs text-neutral-600 hover:text-neutral-400 rounded-lg border border-dashed border-neutral-700/50 hover:border-neutral-600 transition-colors cursor-pointer"
                     >
                       + Session

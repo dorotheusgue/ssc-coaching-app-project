@@ -31,6 +31,7 @@ type GeneratedPlan = {
     endWeek: number;
     sessions: Array<{
       dayOfWeek: number;
+      week?: number;
       label: string;
       notes?: string;
       blocks: Array<{
@@ -71,6 +72,7 @@ const planSchema: Schema = {
               type: SchemaType.OBJECT,
               properties: {
                 dayOfWeek: { type: SchemaType.INTEGER },
+                week: { type: SchemaType.INTEGER },
                 label: { type: SchemaType.STRING },
                 notes: { type: SchemaType.STRING },
                 blocks: {
@@ -203,12 +205,13 @@ CONSTRAINTS — hard rules:
 1. Transcribe ONLY what is in the source. Do not invent weeks, sessions, blocks, or exercises that aren't there. If the source is vague on a value (e.g. no rest time given), leave that field unset rather than guess.
 2. Use ONLY exercises from the EXERCISE LIBRARY below. Match names EXACTLY as written. If a source exercise doesn't appear in the library, pick the closest match by movement pattern and category; if there is no reasonable match, omit that line (the system will report it as skipped).
 3. Generate AT MOST 12 weeks total across all phases in one call. If the source is longer, transcribe the first 12 weeks and stop.
-4. dayOfWeek is 1-7 where 1=Monday, 7=Sunday. Each session occupies one day per week of its phase.
-5. blockType must be one of: warmup, sprint, strength, accessory, notes. Group exercises into blocks that fit their type (warmups in warmup, lifts in strength, etc.).
-6. For sprint/distance exercises, populate "distance" (meters) and "time" (seconds) when given.
-7. For strength exercises, populate "sets", "reps" (string like "5" or "3-5"), and either "load" (string like "80kg" or "BW") or "percent1RM" (number).
-8. Preserve the source's weekly layout, exercise order, sets, reps, and intensities exactly.
-9. The current program already has ${existingPhases.length} phase(s); your phases must start at week ${baseWeekOffset + 1} or later.
+4. dayOfWeek is 1-7 where 1=Monday, 7=Sunday.
+5. The "week" field is 1-based and PHASE-RELATIVE. If a phase has 4 weeks and Monday's session changes each week, emit 4 separate sessions for that day with week=1, 2, 3, 4. If Monday is the same every week of the phase, use week=0 (the system will replay it across all weeks of the phase). Default to week=0 ONLY when content is identical week-to-week.
+6. blockType must be one of: warmup, sprint, strength, accessory, notes. Group exercises into blocks that fit their type (warmups in warmup, lifts in strength, etc.).
+7. For sprint/distance exercises, populate "distance" (meters) and "time" (seconds) when given.
+8. For strength exercises, populate "sets", "reps" (string like "5" or "3-5"), and either "load" (string like "80kg" or "BW") or "percent1RM" (number).
+9. Preserve the source's weekly layout, exercise order, sets, reps, and intensities exactly. If the source labels weeks (Week 1, Week 2, etc.) with different content, you MUST emit a session per week using the "week" field — do not collapse them.
+10. The current program already has ${existingPhases.length} phase(s); your phases must start at week ${baseWeekOffset + 1} or later.
 
 EXERCISE LIBRARY (use these names verbatim):
 ${exerciseLines}`;
@@ -277,11 +280,18 @@ ${exerciseLines}`;
 
     for (let si = 0; si < ph.sessions.length; si++) {
       const sess = ph.sessions[si];
+      const phaseWeekSpan =
+        insertedPhase.endWeek - insertedPhase.startWeek + 1;
+      const rawWeek = sess.week ?? 0;
+      const clampedWeek =
+        rawWeek <= 0 ? 0 : Math.min(Math.max(1, rawWeek), phaseWeekSpan);
+
       const [insertedTemplate] = await db
         .insert(sessionTemplates)
         .values({
           phaseId: insertedPhase.id,
           dayOfWeek: Math.min(7, Math.max(1, sess.dayOfWeek)),
+          week: clampedWeek,
           label: sess.label,
           sortOrder: si,
           notes: sess.notes ?? null,
