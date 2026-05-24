@@ -18,6 +18,7 @@ import {
   GripVertical,
   Save,
   Sparkles,
+  Upload,
 } from "lucide-react";
 import {
   createPhase,
@@ -152,11 +153,39 @@ export default function ProgramBuilderClient({
   const [aiOpen, setAiOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiFileName, setAiFileName] = useState<string | null>(null);
   const [aiResult, setAiResult] = useState<
     | { kind: "ok"; phasesAdded: number; sessionsAdded: number; unknownExercises: string[] }
     | { kind: "err"; message: string }
     | null
   >(null);
+
+  const handleAiFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > 1_000_000) {
+      setAiResult({ kind: "err", message: "File too large (max 1 MB)." });
+      return;
+    }
+    try {
+      const text = await file.text();
+      if (text.length > 50_000) {
+        setAiResult({
+          kind: "err",
+          message: "File contents too long (max 50,000 characters).",
+        });
+        return;
+      }
+      setAiPrompt(text);
+      setAiFileName(file.name);
+      setAiResult(null);
+    } catch {
+      setAiResult({ kind: "err", message: "Could not read file." });
+    }
+  };
 
   const handleAiGenerate = async () => {
     if (!aiPrompt.trim()) return;
@@ -414,21 +443,55 @@ export default function ProgramBuilderClient({
             </h2>
           </div>
           <p className="text-xs text-neutral-400 mb-3">
-            Describe what you want and the AI will add new phases (with
-            sessions, blocks, and exercises) to this program. It only picks
-            from your exercise library. Max 12 weeks per request.
+            Describe what you want, OR upload a markdown file containing an
+            existing program and the AI will parse it into phases, sessions,
+            and exercises. Only exercises in your library are used. Max 12
+            weeks per request.
           </p>
+          <div className="mb-3 flex items-center gap-2">
+            <label className="inline-flex items-center gap-2 px-3 py-1.5 bg-neutral-700 hover:bg-neutral-600 border border-neutral-600 rounded-lg text-xs font-medium text-white cursor-pointer transition-colors">
+              <Upload className="w-3.5 h-3.5" />
+              Upload markdown
+              <input
+                type="file"
+                accept=".md,.markdown,.txt,text/markdown,text/plain"
+                onChange={handleAiFileChange}
+                disabled={aiLoading}
+                className="hidden"
+              />
+            </label>
+            {aiFileName && (
+              <span className="text-xs text-neutral-400">
+                Loaded:{" "}
+                <span className="text-neutral-200">{aiFileName}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAiFileName(null);
+                    setAiPrompt("");
+                  }}
+                  className="ml-2 text-neutral-500 hover:text-red-400 transition-colors"
+                  disabled={aiLoading}
+                >
+                  clear
+                </button>
+              </span>
+            )}
+          </div>
           <textarea
             value={aiPrompt}
-            onChange={(e) => setAiPrompt(e.target.value)}
-            rows={3}
+            onChange={(e) => {
+              setAiPrompt(e.target.value);
+              if (aiFileName) setAiFileName(null);
+            }}
+            rows={aiFileName ? 8 : 3}
             placeholder="e.g. 4-week acceleration block for a senior 100m sprinter, 3 sessions/week: Mon acceleration + lower-body strength, Wed plyometrics + upper, Fri block starts + posterior chain."
             disabled={aiLoading}
-            className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none disabled:opacity-50"
+            className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-y disabled:opacity-50 font-mono"
           />
           <div className="flex items-center justify-between mt-3">
             <div className="text-xs text-neutral-500">
-              {aiPrompt.length}/4000
+              {aiPrompt.length.toLocaleString()}/50,000
             </div>
             <div className="flex gap-2">
               <Button
@@ -436,6 +499,7 @@ export default function ProgramBuilderClient({
                 onClick={() => {
                   setAiOpen(false);
                   setAiPrompt("");
+                  setAiFileName(null);
                   setAiResult(null);
                 }}
                 disabled={aiLoading}
