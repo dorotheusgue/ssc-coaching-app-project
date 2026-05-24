@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import {
   Plus,
@@ -16,6 +17,7 @@ import {
   Repeat,
   GripVertical,
   Save,
+  Sparkles,
 } from "lucide-react";
 import {
   createPhase,
@@ -30,6 +32,7 @@ import {
   removeExerciseFromBlock,
   updateProgram,
 } from "../actions";
+import { generateProgramFromPromptAction } from "@/lib/ai/generateProgram";
 
 type Program = {
   id: number;
@@ -145,6 +148,41 @@ export default function ProgramBuilderClient({
     initialPhases[0]?.id ?? null
   );
   const [addingBlockTo, setAddingBlockTo] = useState<number | null>(null);
+  const router = useRouter();
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResult, setAiResult] = useState<
+    | { kind: "ok"; phasesAdded: number; sessionsAdded: number; unknownExercises: string[] }
+    | { kind: "err"; message: string }
+    | null
+  >(null);
+
+  const handleAiGenerate = async () => {
+    if (!aiPrompt.trim()) return;
+    setAiLoading(true);
+    setAiResult(null);
+    try {
+      const res = await generateProgramFromPromptAction(program.id, aiPrompt);
+      if (res.success) {
+        setAiResult({
+          kind: "ok",
+          phasesAdded: res.phasesAdded,
+          sessionsAdded: res.sessionsAdded,
+          unknownExercises: res.unknownExercises,
+        });
+        setAiPrompt("");
+        router.refresh();
+      } else {
+        setAiResult({ kind: "err", message: res.error });
+      }
+    } catch (err) {
+      console.error(err);
+      setAiResult({ kind: "err", message: "Unexpected error. Try again." });
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const togglePhase = (phaseId: number) => {
     setExpandedPhases((prev) => {
@@ -352,11 +390,88 @@ export default function ProgramBuilderClient({
             </div>
           )}
         </div>
-        <Button onClick={handleAddPhase}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Phase
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="secondary"
+            onClick={() => setAiOpen((v) => !v)}
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            AI Assist
+          </Button>
+          <Button onClick={handleAddPhase}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Phase
+          </Button>
+        </div>
       </div>
+
+      {aiOpen && (
+        <div className="mb-6 bg-neutral-800 border border-emerald-500/30 rounded-xl p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="w-4 h-4 text-emerald-400" />
+            <h2 className="text-sm font-semibold text-white">
+              Generate phases with AI
+            </h2>
+          </div>
+          <p className="text-xs text-neutral-400 mb-3">
+            Describe what you want and the AI will add new phases (with
+            sessions, blocks, and exercises) to this program. It only picks
+            from your exercise library. Max 12 weeks per request.
+          </p>
+          <textarea
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+            rows={3}
+            placeholder="e.g. 4-week acceleration block for a senior 100m sprinter, 3 sessions/week: Mon acceleration + lower-body strength, Wed plyometrics + upper, Fri block starts + posterior chain."
+            disabled={aiLoading}
+            className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none disabled:opacity-50"
+          />
+          <div className="flex items-center justify-between mt-3">
+            <div className="text-xs text-neutral-500">
+              {aiPrompt.length}/4000
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setAiOpen(false);
+                  setAiPrompt("");
+                  setAiResult(null);
+                }}
+                disabled={aiLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAiGenerate}
+                disabled={aiLoading || !aiPrompt.trim()}
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                {aiLoading ? "Generating..." : "Generate"}
+              </Button>
+            </div>
+          </div>
+          {aiResult && aiResult.kind === "ok" && (
+            <div className="mt-3 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-sm text-emerald-300">
+              Added {aiResult.phasesAdded} phase
+              {aiResult.phasesAdded !== 1 ? "s" : ""} and{" "}
+              {aiResult.sessionsAdded} session
+              {aiResult.sessionsAdded !== 1 ? "s" : ""}.
+              {aiResult.unknownExercises.length > 0 && (
+                <div className="mt-2 text-amber-300 text-xs">
+                  Skipped unknown exercises:{" "}
+                  {aiResult.unknownExercises.join(", ")}
+                </div>
+              )}
+            </div>
+          )}
+          {aiResult && aiResult.kind === "err" && (
+            <div className="mt-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-sm text-red-400">
+              {aiResult.message}
+            </div>
+          )}
+        </div>
+      )}
 
       {phases.length === 0 ? (
         <div className="text-center py-20 bg-neutral-800 border border-neutral-700 rounded-xl">
