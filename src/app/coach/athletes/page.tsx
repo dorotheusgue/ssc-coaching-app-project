@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
 import {
@@ -9,10 +8,8 @@ import {
   programAssignments,
 } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
-import { Plus, User, ChevronRight } from "lucide-react";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
 import { AthleteSearch } from "./AthleteSearch";
+import { InviteAthleteButton } from "./InviteAthleteButton";
 
 export default async function AthletesPage() {
   const session = await auth();
@@ -70,10 +67,7 @@ export default async function AthletesPage() {
             roster
           </p>
         </div>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Athlete
-        </Button>
+        <InviteAthleteButton coachId={coachId} />
       </div>
 
       <AthleteSearch athletes={athletesWithMeta} />

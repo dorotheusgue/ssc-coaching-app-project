@@ -125,10 +125,12 @@ function ExerciseLogCard({
   exercise,
   sessionId,
   loggedSets,
+  loggedSprints,
 }: {
   exercise: SessionData["blocks"][0]["exercises"][0];
   sessionId: number;
   loggedSets: SessionData["loggedSets"];
+  loggedSprints: SessionData["loggedSprints"];
 }) {
   const [expanded, setExpanded] = useState(true);
   const [reps, setReps] = useState("");
@@ -138,9 +140,31 @@ function ExerciseLogCard({
   const [rpe, setRpe] = useState("");
   const [isPending, startTransition] = useTransition();
 
-  const exerciseLogs = loggedSets.filter(
-    (s) => s.blockExerciseId === exercise.id
-  );
+  const isSprint =
+    exercise.trackingType === "time" || exercise.trackingType === "distance";
+  const exerciseLogs = isSprint
+    ? loggedSprints
+        .filter((s) => s.blockExerciseId === exercise.id)
+        .map((s) => ({
+          id: s.id,
+          reps: null as number | null,
+          load: null as number | null,
+          distance: s.distance,
+          time: s.time,
+          rpe: s.rpe,
+          completed: s.completed,
+        }))
+    : loggedSets
+        .filter((s) => s.blockExerciseId === exercise.id)
+        .map((s) => ({
+          id: s.id,
+          reps: s.reps,
+          load: s.load,
+          distance: s.distance,
+          time: s.time,
+          rpe: s.rpe,
+          completed: s.completed,
+        }));
   const completedSets = exerciseLogs.filter((s) => s.completed).length;
 
   async function handleLogSet() {
@@ -157,7 +181,7 @@ function ExerciseLogCard({
     formData.set("completed", "true");
 
     startTransition(async () => {
-      if (exercise.trackingType === "time" || exercise.trackingType === "distance") {
+      if (isSprint) {
         await logSprintEntryAction(formData);
       } else {
         await logSetEntryAction(formData);
@@ -443,6 +467,7 @@ export default function TodayClient({
                 exercise={exercise}
                 sessionId={session.id}
                 loggedSets={session.loggedSets}
+                loggedSprints={session.loggedSprints}
               />
             ))}
           </div>

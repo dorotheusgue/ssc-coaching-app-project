@@ -2,13 +2,12 @@
 
 import { db } from "@/db";
 import {
-  programs,
   phases,
   sessionTemplates,
   assignedSessions,
   programAssignments,
 } from "@/db/schema";
-import { eq, and, lte } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { addDays, format, parseISO } from "date-fns";
 import { auth } from "@/lib/auth";
 
@@ -50,23 +49,26 @@ export async function assignProgramAction(formData: FormData) {
       .where(eq(sessionTemplates.phaseId, phase.id))
       .orderBy(sessionTemplates.sortOrder);
 
-    for (const template of templates) {
-      const weekOffset = Math.floor((template.dayOfWeek - 1) / 7);
-      const dayInWeek = ((template.dayOfWeek - 1) % 7) + 1;
-      const phaseWeekOffset = (phase.startWeek - 1) * 7;
-      const sessionDate = addDays(
-        startDate,
-        phaseWeekOffset + weekOffset * 7 + (dayInWeek - 1)
-      );
+    // dayOfWeek is 1-7 (Mon-Sun). Templates define one week; repeat them
+    // across every week of the phase (startWeek..endWeek inclusive).
+    const startWeek = Math.max(1, phase.startWeek);
+    const endWeek = Math.max(startWeek, phase.endWeek);
 
-      await db.insert(assignedSessions).values({
-        assignmentId: assignment.id,
-        athleteId,
-        sessionTemplateId: template.id,
-        date: format(sessionDate, "yyyy-MM-dd"),
-        label: template.label,
-        status: "scheduled",
-      });
+    for (let week = startWeek; week <= endWeek; week++) {
+      for (const template of templates) {
+        const dayInWeek = Math.min(7, Math.max(1, template.dayOfWeek));
+        const offsetDays = (week - 1) * 7 + (dayInWeek - 1);
+        const sessionDate = addDays(startDate, offsetDays);
+
+        await db.insert(assignedSessions).values({
+          assignmentId: assignment.id,
+          athleteId,
+          sessionTemplateId: template.id,
+          date: format(sessionDate, "yyyy-MM-dd"),
+          label: template.label,
+          status: "scheduled",
+        });
+      }
     }
   }
 

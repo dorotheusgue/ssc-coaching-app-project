@@ -25,7 +25,7 @@ export const coachProfiles = sqliteTable("coach_profiles", {
 export const athleteProfiles = sqliteTable("athlete_profiles", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull().unique().references(() => users.id),
-  coachId: integer("coach_id").notNull().references(() => users.id),
+  coachId: integer("coach_id").references(() => users.id),
   sport: text("sport"),
   event: text("event"),
   dateOfBirth: text("date_of_birth"),

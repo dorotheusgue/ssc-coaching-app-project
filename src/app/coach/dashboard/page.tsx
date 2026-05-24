@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
 import {
@@ -7,7 +8,6 @@ import {
   programs,
   assignedSessions,
   readinessEntries,
-  programAssignments,
 } from "@/db/schema";
 import { eq, and, desc, gte, count, avg } from "drizzle-orm";
 import {
@@ -159,12 +159,7 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Link href="/coach/programs/new">
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              New Program
-            </Button>
-          </Link>
+          <NewProgramButton />
           <Link href="/coach/athletes">
             <Button variant="secondary">
               <Plus className="w-4 h-4 mr-2" />
@@ -212,17 +207,7 @@ export default async function DashboardPage() {
           }
         >
           <div className="space-y-3">
-            <Link href="/coach/programs/new" className="block">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-neutral-700/50 hover:bg-neutral-700 transition-colors">
-                <div className="p-2 rounded-md bg-emerald-500/10">
-                  <Dumbbell className="w-4 h-4 text-emerald-500" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white">New Program</p>
-                  <p className="text-xs text-neutral-400">Create a training program</p>
-                </div>
-              </div>
-            </Link>
+            <NewProgramQuickAction />
             <Link href="/coach/athletes" className="block">
               <div className="flex items-center gap-3 p-3 rounded-lg bg-neutral-700/50 hover:bg-neutral-700 transition-colors">
                 <div className="p-2 rounded-md bg-blue-500/10">
@@ -293,5 +278,47 @@ export default async function DashboardPage() {
         )}
       </Card>
     </div>
+  );
+}
+
+async function createNewProgram() {
+  "use server";
+  const session = await auth();
+  if (!session?.user) return;
+  const coachId = parseInt((session.user as { id: string }).id);
+  const [program] = await db
+    .insert(programs)
+    .values({ name: "New Program", coachId })
+    .returning();
+  redirect(`/coach/programs/${program.id}`);
+}
+
+function NewProgramButton() {
+  return (
+    <form action={createNewProgram}>
+      <Button type="submit">
+        <Plus className="w-4 h-4 mr-2" />
+        New Program
+      </Button>
+    </form>
+  );
+}
+
+function NewProgramQuickAction() {
+  return (
+    <form action={createNewProgram}>
+      <button
+        type="submit"
+        className="w-full flex items-center gap-3 p-3 rounded-lg bg-neutral-700/50 hover:bg-neutral-700 transition-colors text-left"
+      >
+        <div className="p-2 rounded-md bg-emerald-500/10">
+          <Dumbbell className="w-4 h-4 text-emerald-500" />
+        </div>
+        <div>
+          <p className="text-sm font-medium text-white">New Program</p>
+          <p className="text-xs text-neutral-400">Create a training program</p>
+        </div>
+      </button>
+    </form>
   );
 }

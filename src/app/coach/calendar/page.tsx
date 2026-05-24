@@ -5,8 +5,6 @@ import {
   assignedSessions,
   programAssignments,
   programs,
-  phases,
-  sessionTemplates,
   users,
   athleteProfiles,
 } from "@/db/schema";
@@ -59,9 +57,13 @@ export default async function CalendarPage({
     })
     .from(assignedSessions)
     .innerJoin(users, eq(assignedSessions.athleteId, users.id))
+    .innerJoin(
+      athleteProfiles,
+      eq(athleteProfiles.userId, assignedSessions.athleteId)
+    )
     .where(
       and(
-        eq(assignedSessions.athleteId, users.id),
+        eq(athleteProfiles.coachId, coachId),
         between(assignedSessions.date, monthStart, monthEnd)
       )
     )

@@ -1,5 +1,5 @@
 import { db } from "./index";
-import { users, exercises, coachProfiles } from "./schema";
+import { users, exercises, coachProfiles, athleteProfiles } from "./schema";
 import bcrypt from "bcryptjs";
 
 async function seed() {
@@ -57,6 +57,30 @@ async function seed() {
       role: "athlete",
     })
     .returning();
+
+  await db.insert(athleteProfiles).values([
+    {
+      userId: athlete1.id,
+      coachId: coach.id,
+      sport: "Track & Field",
+      event: "100m / 200m",
+      personalBests: { "100m": "10.62", "200m": "21.45" },
+    },
+    {
+      userId: athlete2.id,
+      coachId: coach.id,
+      sport: "Track & Field",
+      event: "400m",
+      personalBests: { "400m": "52.10", "200m": "24.30" },
+    },
+    {
+      userId: athlete3.id,
+      coachId: coach.id,
+      sport: "Rugby",
+      event: "Wing",
+      personalBests: { "40m": "4.78" },
+    },
+  ]);
 
   // Seed default exercises
   const defaultExercises = [

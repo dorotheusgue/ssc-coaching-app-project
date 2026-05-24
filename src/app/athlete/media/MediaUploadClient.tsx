@@ -157,10 +157,11 @@ export default function MediaUploadClient({
                 className="w-full rounded-lg"
               />
             ) : (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={selected.fileUrl}
                 alt={selected.caption || ""}
-                className="w-full rounded-lg" // eslint-disable-line @next/next/no-img-element
+                className="w-full rounded-lg"
               />
             )}
           </div>

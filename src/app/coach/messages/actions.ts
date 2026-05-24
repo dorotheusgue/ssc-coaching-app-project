@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { conversations, messages } from "@/db/schema";
-import { eq, and, or, desc } from "drizzle-orm";
+import { eq, and, ne, isNull } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -70,7 +70,8 @@ export async function markReadAction(conversationId: number, userId: number) {
     .where(
       and(
         eq(messages.conversationId, conversationId),
-        eq(messages.senderId, userId)
+        ne(messages.senderId, userId),
+        isNull(messages.readAt)
       )
     );
   return { success: true };

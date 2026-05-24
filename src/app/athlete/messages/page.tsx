@@ -29,21 +29,22 @@ export default async function AthleteMessagesPage() {
       .where(eq(athleteProfiles.userId, athleteId))
       .get();
 
-    if (profile) {
+    if (profile?.coachId) {
+      const profileCoachId = profile.coachId;
       const coach = await db
         .select({ name: users.name })
         .from(users)
-        .where(eq(users.id, profile.coachId))
+        .where(eq(users.id, profileCoachId))
         .get();
 
       const [newConvo] = await db
         .insert(conversations)
-        .values({ coachId: profile.coachId, athleteId })
+        .values({ coachId: profileCoachId, athleteId })
         .returning();
 
       convo = {
         id: newConvo.id,
-        coachId: profile.coachId,
+        coachId: profileCoachId,
         coachName: coach?.name ?? "Coach",
       };
     }
