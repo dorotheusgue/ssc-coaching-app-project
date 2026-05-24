@@ -59,20 +59,11 @@ export async function registerAction(formData: FormData) {
   if (role === "athlete") {
     await db.insert(athleteProfiles).values({
       userId: user.id,
-      coachId: 1,
+      coachId: null,
     });
   }
 
-  try {
-    await nextAuthSignIn("credentials", {
-      email,
-      password,
-      redirectTo: undefined,
-    });
-    return { success: true };
-  } catch {
-    return { success: true };
-  }
+  return { success: true };
 }
 
 export async function inviteAthleteAction(formData: FormData) {
