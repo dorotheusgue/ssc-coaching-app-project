@@ -154,6 +154,21 @@ export async function deleteAssignedSessionAction(assignedSessionId: number) {
  return { success: true };
 }
 
+export async function deleteAssignedSessionsAction(ids: number[]) {
+ const session = await auth();
+ if (!session?.user) return { error: "Unauthorized" };
+ if (!Array.isArray(ids) || ids.length === 0) {
+ return { error: "No sessions selected" };
+ }
+
+ await cascadeDeleteAssignedSessions(ids);
+
+ revalidatePath("/coach/calendar");
+ revalidatePath("/athlete/calendar");
+ revalidatePath("/athlete/today");
+ return { success: true, removed: ids.length };
+}
+
 export async function deleteAssignmentAction(assignmentId: number) {
  const session = await auth();
  if (!session?.user) return { error: "Unauthorized" };

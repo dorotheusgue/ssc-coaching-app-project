@@ -13,7 +13,11 @@ import {
 } from "recharts";
 import { Card } from "@/components/ui/Card";
 import { Activity, Calendar, Clock, TrendingUp, Trash2 } from "lucide-react";
-import { deleteAssignedSessionAction } from "@/app/coach/calendar/actions";
+import {
+ deleteAssignedSessionAction,
+ deleteAssignedSessionsAction,
+} from "@/app/coach/calendar/actions";
+import { Button } from "@/components/ui/Button";
 
 interface Session {
  id: number;
@@ -66,11 +70,49 @@ export function AthleteDetailClient({
 }: AthleteDetailClientProps) {
  const router = useRouter();
  const [activeTab, setActiveTab] = useState<Tab>("Overview");
+ const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+
+ const allSessionIds = allSessions.map((s) => s.id);
+ const allSelected =
+ allSessionIds.length > 0 &&
+ allSessionIds.every((id) => selectedIds.has(id));
+
+ function toggleOne(id: number) {
+ setSelectedIds((prev) => {
+ const next = new Set(prev);
+ if (next.has(id)) next.delete(id);
+ else next.add(id);
+ return next;
+ });
+ }
+
+ function toggleAll() {
+ setSelectedIds(allSelected ? new Set() : new Set(allSessionIds));
+ }
+
+ function clearSelection() {
+ setSelectedIds(new Set());
+ }
 
  async function handleDeleteSession(s: Session) {
    if (!confirm(`Remove session "${s.label}" on ${s.date}?`)) return;
    await deleteAssignedSessionAction(s.id);
    router.refresh();
+ }
+
+ async function handleBulkDelete() {
+ const ids = Array.from(selectedIds);
+ if (ids.length === 0) return;
+ if (
+ !confirm(
+ `Remove ${ids.length} session${ids.length === 1 ? "" : "s"}? Any logged sets will be lost.`
+ )
+ ) {
+ return;
+ }
+ await deleteAssignedSessionsAction(ids);
+ clearSelection();
+ router.refresh();
  }
 
  const readinessChartData = [...recentReadiness]
@@ -213,10 +255,40 @@ export function AthleteDetailClient({
  {allSessions.length === 0 ? (
  <p className="text-mute text-sm py-4">No sessions found.</p>
  ) : (
+ <div className="space-y-3">
+ {selectedIds.size > 0 && (
+ <div className="flex items-center justify-between gap-3 px-4 py-2 bg-ink/5 border border-line">
+ <span className="text-sm text-ink">
+ {selectedIds.size} selected
+ </span>
+ <div className="flex gap-2">
+ <Button size="sm" variant="ghost" onClick={clearSelection}>
+ Cancel
+ </Button>
+ <Button
+ size="sm"
+ variant="danger"
+ onClick={handleBulkDelete}
+ >
+ <Trash2 className="w-4 h-4 mr-1.5" />
+ Delete {selectedIds.size}
+ </Button>
+ </div>
+ </div>
+ )}
  <div className="overflow-x-auto">
  <table className="w-full text-sm">
  <thead>
  <tr className="border-b border-line">
+ <th className="py-3 px-4 w-10">
+ <input
+ type="checkbox"
+ checked={allSelected}
+ onChange={toggleAll}
+ className="accent-ink cursor-pointer"
+ aria-label="Select all sessions"
+ />
+ </th>
  <th className="text-left py-3 px-4 text-mute font-medium">
  Session
  </th>
@@ -229,14 +301,28 @@ export function AthleteDetailClient({
  <th className="text-left py-3 px-4 text-mute font-medium">
  Completed
  </th>
+ <th />
  </tr>
  </thead>
  <tbody>
- {allSessions.map((s) => (
+ {allSessions.map((s) => {
+ const isSelected = selectedIds.has(s.id);
+ return (
  <tr
  key={s.id}
- className="border-b border-line/50 hover:bg-hover/30"
+ className={`border-b border-line/50 hover:bg-hover/30 ${
+ isSelected ? "bg-ink/5" : ""
+ }`}
  >
+ <td className="py-3 px-4">
+ <input
+ type="checkbox"
+ checked={isSelected}
+ onChange={() => toggleOne(s.id)}
+ className="accent-ink cursor-pointer"
+ aria-label={`Select session ${s.label}`}
+ />
+ </td>
  <td className="py-3 px-4 text-ink">{s.label}</td>
  <td className="py-3 px-4 text-ink">{s.date}</td>
  <td className="py-3 px-4">
@@ -269,9 +355,11 @@ export function AthleteDetailClient({
  </button>
  </td>
  </tr>
- ))}
+ );
+ })}
  </tbody>
  </table>
+ </div>
  </div>
  )}
  </Card>

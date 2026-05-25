@@ -19,6 +19,7 @@ import {
  assignProgramAction,
  rescheduleSessionAction,
  deleteAssignedSessionAction,
+ deleteAssignedSessionsAction,
  deleteAssignmentAction,
 } from "./actions";
 
@@ -61,6 +62,9 @@ export default function CalendarClient({
  const router = useRouter();
  const [showAssign, setShowAssign] = useState(false);
  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+ const [selectedDaySessions, setSelectedDaySessions] = useState<Set<number>>(
+ new Set()
+ );
  const [assignLoading, setAssignLoading] = useState(false);
  const [assignError, setAssignError] = useState("");
 
@@ -115,6 +119,36 @@ export default function CalendarClient({
  return;
  }
  await deleteAssignedSessionAction(s.id);
+ router.refresh();
+ }
+
+ function toggleDaySession(id: number) {
+ setSelectedDaySessions((prev) => {
+ const next = new Set(prev);
+ if (next.has(id)) next.delete(id);
+ else next.add(id);
+ return next;
+ });
+ }
+
+ function toggleAllDaySessions() {
+ const allIds = daySessions.map((s) => s.id);
+ const allSelected = allIds.every((id) => selectedDaySessions.has(id));
+ setSelectedDaySessions(allSelected ? new Set() : new Set(allIds));
+ }
+
+ async function handleBulkDeleteDay() {
+ const ids = Array.from(selectedDaySessions);
+ if (ids.length === 0) return;
+ if (
+ !confirm(
+ `Remove ${ids.length} session${ids.length === 1 ? "" : "s"}? Any logged sets will be lost.`
+ )
+ ) {
+ return;
+ }
+ await deleteAssignedSessionsAction(ids);
+ setSelectedDaySessions(new Set());
  router.refresh();
  }
 
@@ -188,7 +222,10 @@ export default function CalendarClient({
  return (
  <div
  key={dateStr}
- onClick={() => setSelectedDay(dateStr)}
+ onClick={() => {
+ setSelectedDay(dateStr);
+ setSelectedDaySessions(new Set());
+ }}
  className={`min-h-28 p-2 border-r border-b border-line cursor-pointer hover:bg-hover transition-colors ${
  today ? "bg-surface ring-1 ring-ink/30" : ""
  } ${selectedDay === dateStr ? "bg-surface" : ""}`}
@@ -234,23 +271,75 @@ export default function CalendarClient({
  Sessions on {format(new Date(selectedDay + "T12:00:00"), "MMMM d, yyyy")}
  </h3>
  <button
- onClick={() => setSelectedDay(null)}
+ onClick={() => {
+ setSelectedDay(null);
+ setSelectedDaySessions(new Set());
+ }}
  className="text-mute hover:text-ink"
  >
  <X className="w-5 h-5" />
  </button>
  </div>
  <div className="space-y-3">
- {daySessions.map((s) => (
+ <div className="flex items-center justify-between gap-3 px-1">
+ <label className="flex items-center gap-2 text-sm text-mute cursor-pointer">
+ <input
+ type="checkbox"
+ checked={
+ daySessions.length > 0 &&
+ daySessions.every((s) =>
+ selectedDaySessions.has(s.id)
+ )
+ }
+ onChange={toggleAllDaySessions}
+ className="accent-ink cursor-pointer"
+ aria-label="Select all sessions on this day"
+ />
+ Select all
+ </label>
+ {selectedDaySessions.size > 0 && (
+ <div className="flex items-center gap-2">
+ <span className="text-sm text-ink">
+ {selectedDaySessions.size} selected
+ </span>
+ <Button
+ size="sm"
+ variant="danger"
+ onClick={handleBulkDeleteDay}
+ >
+ <Trash2 className="w-4 h-4 mr-1.5" />
+ Delete
+ </Button>
+ </div>
+ )}
+ </div>
+ {daySessions.map((s) => {
+ const isSelected = selectedDaySessions.has(s.id);
+ return (
  <div
  key={s.id}
- className="flex items-center justify-between p-3 bg-surface "
+ className={`flex items-center justify-between p-3 bg-surface ${
+ isSelected ? "ring-1 ring-ink/30" : ""
+ }`}
  >
- <div>
- <div className="text-ink font-medium">{s.athleteName}</div>
- <div className="text-mute text-sm">{s.label}</div>
+ <div className="flex items-center gap-3 min-w-0">
+ <input
+ type="checkbox"
+ checked={isSelected}
+ onChange={() => toggleDaySession(s.id)}
+ className="accent-ink cursor-pointer"
+ aria-label={`Select ${s.label} for ${s.athleteName}`}
+ />
+ <div className="min-w-0">
+ <div className="text-ink font-medium truncate">
+ {s.athleteName}
  </div>
- <div className="flex items-center gap-2">
+ <div className="text-mute text-sm truncate">
+ {s.label}
+ </div>
+ </div>
+ </div>
+ <div className="flex items-center gap-2 shrink-0">
  <Badge color={statusColor(s.status) as "emerald" | "yellow" | "red" | "neutral"}>
  {s.status}
  </Badge>
@@ -263,7 +352,8 @@ export default function CalendarClient({
  </button>
  </div>
  </div>
- ))}
+ );
+ })}
  </div>
  </div>
  )}
