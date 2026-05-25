@@ -4,14 +4,16 @@ import { redirect } from "next/navigation";
 import {
   assignedSessions,
   readinessEntries,
-  sessionTemplates,
   sessionBlocks,
   blockExercises,
   exercises,
   setEntries,
   sprintEntries,
+  athleteProfiles,
+  conversations,
+  messages,
 } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, asc } from "drizzle-orm";
 import { format } from "date-fns";
 import TodayClient from "./TodayClient";
 
@@ -134,6 +136,66 @@ export default async function TodayPage() {
 
   const userName = session.user.name ?? "Athlete";
 
+  // Resolve the athlete's coach + conversation (lazy-create the convo).
+  let convoId: number | null = null;
+  let coachId: number | null = null;
+  const profile = await db
+    .select({ coachId: athleteProfiles.coachId })
+    .from(athleteProfiles)
+    .where(eq(athleteProfiles.userId, athleteId))
+    .get();
+  if (profile?.coachId) {
+    coachId = profile.coachId;
+    const existingConvo = await db
+      .select({ id: conversations.id })
+      .from(conversations)
+      .where(
+        and(
+          eq(conversations.coachId, profile.coachId),
+          eq(conversations.athleteId, athleteId)
+        )
+      )
+      .get();
+    if (existingConvo) {
+      convoId = existingConvo.id;
+    } else {
+      const [created] = await db
+        .insert(conversations)
+        .values({ coachId: profile.coachId, athleteId })
+        .returning({ id: conversations.id });
+      convoId = created.id;
+    }
+  }
+
+  // Recent messages tied to today's session (if any).
+  let sessionMessages: Array<{
+    id: number;
+    senderId: number;
+    text: string;
+    mediaUrl: string | null;
+    mediaType: string | null;
+    createdAt: Date | null;
+  }> = [];
+  if (convoId && todaySession) {
+    sessionMessages = await db
+      .select({
+        id: messages.id,
+        senderId: messages.senderId,
+        text: messages.text,
+        mediaUrl: messages.mediaUrl,
+        mediaType: messages.mediaType,
+        createdAt: messages.createdAt,
+      })
+      .from(messages)
+      .where(
+        and(
+          eq(messages.conversationId, convoId),
+          eq(messages.assignedSessionId, todaySession.id)
+        )
+      )
+      .orderBy(asc(messages.createdAt));
+  }
+
   const lastReadiness = await db
     .select({
       sleepQuality: readinessEntries.sleepQuality,
@@ -155,6 +217,9 @@ export default async function TodayPage() {
       userName={userName}
       today={today}
       lastReadiness={lastReadiness ?? null}
+      conversationId={convoId}
+      coachId={coachId}
+      sessionMessages={sessionMessages}
     />
   );
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { messages } from "@/db/schema";
+import { messages, assignedSessions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(
@@ -19,9 +19,18 @@ export async function GET(
       id: messages.id,
       senderId: messages.senderId,
       text: messages.text,
+      mediaUrl: messages.mediaUrl,
+      mediaType: messages.mediaType,
+      assignedSessionId: messages.assignedSessionId,
+      sessionLabel: assignedSessions.label,
+      sessionDate: assignedSessions.date,
       createdAt: messages.createdAt,
     })
     .from(messages)
+    .leftJoin(
+      assignedSessions,
+      eq(assignedSessions.id, messages.assignedSessionId)
+    )
     .where(eq(messages.conversationId, conversationId))
     .orderBy(messages.createdAt);
 

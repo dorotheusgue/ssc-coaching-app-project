@@ -27,6 +27,8 @@ import {
   logSprintEntryAction,
   completeSessionAction,
 } from "./actions";
+import { sendMessageAction } from "@/app/coach/messages/actions";
+import { MessageSquare } from "lucide-react";
 
 type SessionData = {
   id: number;
@@ -399,12 +401,24 @@ function SessionProgress({ session }: { session: SessionData }) {
   );
 }
 
+type SessionMessage = {
+  id: number;
+  senderId: number;
+  text: string;
+  mediaUrl: string | null;
+  mediaType: string | null;
+  createdAt: Date | null;
+};
+
 export default function TodayClient({
   session,
   athleteId,
   userName,
   today,
   lastReadiness,
+  conversationId,
+  coachId,
+  sessionMessages: initialSessionMessages,
 }: {
   session: SessionData | null;
   athleteId: number;
@@ -417,6 +431,9 @@ export default function TodayClient({
     stress: number;
     mood: number;
   } | null;
+  conversationId: number | null;
+  coachId: number | null;
+  sessionMessages: SessionMessage[];
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -472,6 +489,39 @@ export default function TodayClient({
       if (restIntervalRef.current) clearInterval(restIntervalRef.current);
     };
   }, []);
+
+  const [sessionMessages, setSessionMessages] = useState<SessionMessage[]>(
+    initialSessionMessages
+  );
+  const [chatText, setChatText] = useState("");
+  const [chatPending, chatStartTransition] = useTransition();
+
+  async function sendSessionMessage() {
+    if (!conversationId || !session) return;
+    const text = chatText.trim();
+    if (!text) return;
+    setChatText("");
+    setSessionMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        senderId: athleteId,
+        text,
+        mediaUrl: null,
+        mediaType: null,
+        createdAt: new Date(),
+      },
+    ]);
+    chatStartTransition(async () => {
+      const formData = new FormData();
+      formData.set("conversationId", String(conversationId));
+      formData.set("senderId", String(athleteId));
+      formData.set("text", text);
+      formData.set("assignedSessionId", String(session.id));
+      await sendMessageAction(formData);
+      router.refresh();
+    });
+  }
 
   const hasReadiness = !!session?.readiness;
 
@@ -627,6 +677,55 @@ export default function TodayClient({
           </div>
         ))}
       </div>
+
+      {conversationId && (
+        <div className="bg-neutral-800 border border-neutral-700 rounded-xl p-4 space-y-3">
+          <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+            <MessageSquare className="w-4 h-4 text-emerald-400" />
+            Notes for coach
+          </h2>
+          {sessionMessages.length > 0 && (
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {sessionMessages.map((m) => {
+                const mine = m.senderId === athleteId;
+                return (
+                  <div
+                    key={m.id}
+                    className={`flex ${mine ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[80%] px-3 py-1.5 rounded-2xl text-sm ${
+                        mine
+                          ? "bg-emerald-600 text-white"
+                          : "bg-neutral-700 text-white"
+                      }`}
+                    >
+                      {m.text}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={chatText}
+              onChange={(e) => setChatText(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && sendSessionMessage()}
+              placeholder="Tell your coach how it went..."
+              className="flex-1 bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+            <Button
+              onClick={sendSessionMessage}
+              disabled={!chatText.trim() || chatPending}
+              size="sm"
+            >
+              Send
+            </Button>
+          </div>
+        </div>
+      )}
 
       {session.status !== "completed" && (
         <Button onClick={handleCompleteSession} disabled={isPending} className="w-full" size="lg">

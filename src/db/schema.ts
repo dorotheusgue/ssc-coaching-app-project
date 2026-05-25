@@ -246,6 +246,7 @@ export const messages = sqliteTable("messages", {
   mediaUrl: text("media_url"),
   mediaType: text("media_type"),
   readAt: integer("read_at", { mode: "timestamp" }),
+  assignedSessionId: integer("assigned_session_id").references(() => assignedSessions.id),
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });
 

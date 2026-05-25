@@ -12,16 +12,28 @@ export async function sendMessageAction(formData: FormData) {
 
   const conversationId = parseInt(formData.get("conversationId") as string);
   const senderId = parseInt(formData.get("senderId") as string);
-  const text = formData.get("text") as string;
+  const text = (formData.get("text") as string) ?? "";
+  const mediaUrl = (formData.get("mediaUrl") as string) || null;
+  const mediaType = (formData.get("mediaType") as string) || null;
+  const sessionIdRaw = formData.get("assignedSessionId");
+  const assignedSessionId = sessionIdRaw
+    ? parseInt(sessionIdRaw as string) || null
+    : null;
 
-  if (!conversationId || !senderId || !text) {
-    return { error: "All fields required" };
+  if (!conversationId || !senderId) {
+    return { error: "Missing conversation or sender" };
+  }
+  if (!text.trim() && !mediaUrl) {
+    return { error: "Message cannot be empty" };
   }
 
   await db.insert(messages).values({
     conversationId,
     senderId,
-    text,
+    text: text.trim() || (mediaType?.startsWith("video") ? "[video]" : "[attachment]"),
+    mediaUrl,
+    mediaType,
+    assignedSessionId,
   });
 
   await db
@@ -31,6 +43,7 @@ export async function sendMessageAction(formData: FormData) {
 
   revalidatePath("/coach/messages");
   revalidatePath("/athlete/messages");
+  revalidatePath("/athlete/today");
   return { success: true };
 }
 

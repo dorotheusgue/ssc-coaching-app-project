@@ -1,9 +1,14 @@
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { conversations, users, messages, athleteProfiles } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import {
+  conversations,
+  users,
+  messages,
+  athleteProfiles,
+  assignedSessions,
+} from "@/db/schema";
+import { eq } from "drizzle-orm";
 import AthleteMessagesClient from "./AthleteMessagesClient";
 
 export default async function AthleteMessagesPage() {
@@ -63,9 +68,18 @@ export default async function AthleteMessagesPage() {
       id: messages.id,
       senderId: messages.senderId,
       text: messages.text,
+      mediaUrl: messages.mediaUrl,
+      mediaType: messages.mediaType,
+      assignedSessionId: messages.assignedSessionId,
+      sessionLabel: assignedSessions.label,
+      sessionDate: assignedSessions.date,
       createdAt: messages.createdAt,
     })
     .from(messages)
+    .leftJoin(
+      assignedSessions,
+      eq(assignedSessions.id, messages.assignedSessionId)
+    )
     .where(eq(messages.conversationId, convo.id))
     .orderBy(messages.createdAt);
 
