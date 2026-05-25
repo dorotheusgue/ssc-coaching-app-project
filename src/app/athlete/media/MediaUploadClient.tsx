@@ -17,16 +17,25 @@ type MediaItem = {
  createdAt: Date | null;
 };
 
+type RecentSession = {
+ id: number;
+ label: string;
+ date: string;
+};
+
 export default function MediaUploadClient({
  items,
  athleteId,
+ recentSessions,
 }: {
  items: MediaItem[];
  athleteId: number;
+ recentSessions: RecentSession[];
 }) {
  const router = useRouter();
  const [uploading, setUploading] = useState(false);
  const [caption, setCaption] = useState("");
+ const [linkedSessionId, setLinkedSessionId] = useState<string>("");
  const [selected, setSelected] = useState<MediaItem | null>(null);
  const [error, setError] = useState("");
 
@@ -59,11 +68,15 @@ export default function MediaUploadClient({
  saveFormData.set("fileSize", String(data.fileSize));
  saveFormData.set("type", mediaType);
  saveFormData.set("caption", caption);
+ if (linkedSessionId) {
+ saveFormData.set("assignedSessionId", linkedSessionId);
+ }
 
  const { saveMediaAction } = await import("./actions");
  await saveMediaAction(saveFormData);
 
  setCaption("");
+ setLinkedSessionId("");
  router.refresh();
  } catch {
  setError("Upload failed");
@@ -96,6 +109,20 @@ export default function MediaUploadClient({
  placeholder="Caption (optional)"
  className="w-full bg-surface border border-line px-3 py-2 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-ink"
  />
+ {recentSessions.length > 0 && (
+ <select
+ value={linkedSessionId}
+ onChange={(e) => setLinkedSessionId(e.target.value)}
+ className="w-full bg-surface border border-line px-3 py-2 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-ink"
+ >
+ <option value="">Link to session (optional)</option>
+ {recentSessions.map((s) => (
+ <option key={s.id} value={s.id}>
+ {s.date} · {s.label}
+ </option>
+ ))}
+ </select>
+ )}
  <label className="flex items-center justify-center gap-2 w-full p-4 border-2 border-dashed border-line cursor-pointer hover:border-ink transition-colors">
  <Upload className="w-5 h-5 text-mute" />
  <span className="text-mute text-sm">

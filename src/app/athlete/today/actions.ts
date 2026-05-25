@@ -6,8 +6,12 @@ import {
  setEntries,
  sprintEntries,
  assignedSessions,
+ blockExercises,
+ exercises,
+ sessionBlocks,
+ sessionTemplates,
 } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -123,6 +127,106 @@ export async function logSprintEntryAction(formData: FormData) {
 
  revalidatePath("/athlete/today");
  return { success: true };
+}
+
+export async function getSwapCandidatesAction(blockExerciseId: number) {
+ const session = await auth();
+ if (!session?.user) return { ok: false as const, error: "Unauthorized" };
+
+ const current = await db
+ .select({
+ exerciseId: blockExercises.exerciseId,
+ movementPattern: exercises.movementPattern,
+ category: exercises.category,
+ })
+ .from(blockExercises)
+ .leftJoin(exercises, eq(exercises.id, blockExercises.exerciseId))
+ .where(eq(blockExercises.id, blockExerciseId))
+ .get();
+
+ if (!current) return { ok: false as const, error: "Not found" };
+
+ // Prefer same movement pattern; fall back to same category.
+ const pattern = current.movementPattern;
+ const rows = await db
+ .select({
+ id: exercises.id,
+ name: exercises.name,
+ category: exercises.category,
+ movementPattern: exercises.movementPattern,
+ trackingType: exercises.trackingType,
+ description: exercises.description,
+ videoUrl: exercises.videoUrl,
+ })
+ .from(exercises)
+ .where(
+ pattern
+ ? and(
+ eq(exercises.movementPattern, pattern),
+ current.exerciseId !== null
+ ? ne(exercises.id, current.exerciseId)
+ : undefined
+ )
+ : current.category
+ ? and(
+ eq(exercises.category, current.category),
+ current.exerciseId !== null
+ ? ne(exercises.id, current.exerciseId)
+ : undefined
+ )
+ : undefined
+ )
+ .limit(20);
+
+ return { ok: true as const, candidates: rows };
+}
+
+export async function swapBlockExerciseAction(
+ blockExerciseId: number,
+ newExerciseId: number
+) {
+ const authSession = await auth();
+ if (!authSession?.user) return { ok: false as const, error: "Unauthorized" };
+ const athleteId = parseInt((authSession.user as { id?: string }).id ?? "0");
+ if (!athleteId) return { ok: false as const, error: "Unauthorized" };
+
+ // Verify ownership: the block-exercise must belong to a session template
+ // that has an assigned session for this athlete.
+ const rel = await db
+ .select({
+ blockExerciseId: blockExercises.id,
+ blockId: blockExercises.blockId,
+ templateId: sessionBlocks.sessionTemplateId,
+ })
+ .from(blockExercises)
+ .innerJoin(sessionBlocks, eq(sessionBlocks.id, blockExercises.blockId))
+ .where(eq(blockExercises.id, blockExerciseId))
+ .get();
+ if (!rel) return { ok: false as const, error: "Not found" };
+
+ const owned = await db
+ .select({ id: assignedSessions.id })
+ .from(assignedSessions)
+ .innerJoin(
+ sessionTemplates,
+ eq(sessionTemplates.id, assignedSessions.sessionTemplateId)
+ )
+ .where(
+ and(
+ eq(assignedSessions.athleteId, athleteId),
+ eq(sessionTemplates.id, rel.templateId)
+ )
+ )
+ .get();
+ if (!owned) return { ok: false as const, error: "Not your session" };
+
+ await db
+ .update(blockExercises)
+ .set({ exerciseId: newExerciseId })
+ .where(eq(blockExercises.id, blockExerciseId));
+
+ revalidatePath("/athlete/today");
+ return { ok: true as const };
 }
 
 export async function completeSessionAction(formData: FormData) {

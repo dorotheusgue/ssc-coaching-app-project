@@ -16,6 +16,10 @@ export async function saveMediaAction(formData: FormData) {
  const fileSize = parseInt(formData.get("fileSize") as string);
  const type = formData.get("type") as "video" | "image";
  const caption = (formData.get("caption") as string) || null;
+ const assignedSessionIdRaw = formData.get("assignedSessionId");
+ const assignedSessionId = assignedSessionIdRaw
+ ? parseInt(assignedSessionIdRaw as string) || null
+ : null;
 
  await db.insert(media).values({
  athleteId,
@@ -25,6 +29,7 @@ export async function saveMediaAction(formData: FormData) {
  fileSize,
  type,
  caption,
+ assignedSessionId,
  });
 
  revalidatePath("/athlete/media");

@@ -34,9 +34,8 @@ export default async function TodayPage() {
  )
  .get();
 
- let sessionData = null;
- if (todaySession) {
- const readiness = await db
+ // Today's readiness entry — exists whether or not there is a session.
+ const todayReadiness = await db
  .select()
  .from(readinessEntries)
  .where(
@@ -47,6 +46,8 @@ export default async function TodayPage() {
  )
  .get();
 
+ let sessionData = null;
+ if (todaySession) {
  let blocks: Array<{
  id: number;
  blockType: string;
@@ -58,6 +59,8 @@ export default async function TodayPage() {
  exerciseName: string;
  exerciseCategory: string;
  trackingType: string;
+ videoUrl: string | null;
+ description: string | null;
  sets: number | null;
  reps: string | null;
  load: string | null;
@@ -94,6 +97,8 @@ export default async function TodayPage() {
  exerciseName: exercises.name,
  exerciseCategory: exercises.category,
  trackingType: exercises.trackingType,
+ videoUrl: exercises.videoUrl,
+ description: exercises.description,
  })
  .from(blockExercises)
  .leftJoin(exercises, eq(blockExercises.exerciseId, exercises.id))
@@ -127,7 +132,7 @@ export default async function TodayPage() {
 
  sessionData = {
  ...todaySession,
- readiness: readiness ?? null,
+ readiness: todayReadiness ?? null,
  blocks,
  loggedSets,
  loggedSprints,
@@ -216,6 +221,7 @@ export default async function TodayPage() {
  athleteId={athleteId}
  userName={userName}
  today={today}
+ todayReadiness={todayReadiness ?? null}
  lastReadiness={lastReadiness ?? null}
  conversationId={convoId}
  coachId={coachId}
