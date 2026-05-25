@@ -15,9 +15,17 @@ import {
  Upload,
  Play,
  Dumbbell,
+ Bookmark,
+ BookOpen,
 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { getVideoThumbnail } from "@/lib/videoThumb";
+import {
+ listBlockTemplates,
+ saveBlockAsTemplate,
+ insertBlockFromTemplate,
+ deleteBlockTemplate,
+} from "../actions";
 import {
  createPhase,
  updatePhase,
@@ -1136,12 +1144,18 @@ function PhaseView({
  onOpenExercisePicker(block.id)
  }
  className="p-0.5 hover:bg-hover text-faint hover:text-ink transition-colors"
+ title="Add exercise"
  >
  <Plus className="w-3 h-3" />
  </button>
+ <SaveBlockTemplateButton
+ blockId={block.id}
+ defaultName={block.label ?? block.blockType}
+ />
  <button
  onClick={() => onDeleteBlock(block.id)}
  className="p-0.5 hover:bg-hover text-faint hover:text-red-400 transition-colors"
+ title="Delete block"
  >
  <Trash2 className="w-3 h-3" />
  </button>
@@ -1213,6 +1227,10 @@ function PhaseView({
  {bt}
  </button>
  ))}
+ <InsertTemplateButton
+ sessionTemplateId={template.id}
+ onInserted={onCancelAddBlock}
+ />
  <button
  onClick={onCancelAddBlock}
  className="px-2 py-1 text-xs text-faint hover:text-ink transition-colors cursor-pointer"
@@ -1248,5 +1266,143 @@ function PhaseView({
  </div>
  </div>
  </div>
+ );
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Block template controls
+
+function SaveBlockTemplateButton({
+ blockId,
+ defaultName,
+}: {
+ blockId: number;
+ defaultName: string;
+}) {
+ const [saving, setSaving] = useState(false);
+ const [saved, setSaved] = useState(false);
+
+ async function onClick() {
+ const name = window.prompt("Save block as template — name?", defaultName);
+ if (!name) return;
+ setSaving(true);
+ try {
+ await saveBlockAsTemplate(blockId, name);
+ setSaved(true);
+ setTimeout(() => setSaved(false), 1500);
+ } finally {
+ setSaving(false);
+ }
+ }
+
+ return (
+ <button
+ onClick={onClick}
+ disabled={saving}
+ title={saved ? "Saved" : "Save as template"}
+ className="p-0.5 hover:bg-hover text-faint hover:text-ink transition-colors disabled:opacity-50"
+ >
+ <Bookmark className={`w-3 h-3 ${saved ? "fill-ink text-ink" : ""}`} />
+ </button>
+ );
+}
+
+function InsertTemplateButton({
+ sessionTemplateId,
+ onInserted,
+}: {
+ sessionTemplateId: number;
+ onInserted: () => void;
+}) {
+ const router = useRouter();
+ const [open, setOpen] = useState(false);
+ const [templates, setTemplates] = useState<
+ Array<{ id: number; name: string; blockType: string; label: string | null }>
+ >([]);
+ const [loading, setLoading] = useState(false);
+ const [inserting, setInserting] = useState<number | null>(null);
+
+ async function openModal() {
+ setOpen(true);
+ setLoading(true);
+ const rows = await listBlockTemplates();
+ setTemplates(
+ rows.map((r) => ({
+ id: r.id,
+ name: r.name,
+ blockType: r.blockType,
+ label: r.label,
+ }))
+ );
+ setLoading(false);
+ }
+
+ async function pick(id: number) {
+ setInserting(id);
+ try {
+ await insertBlockFromTemplate(sessionTemplateId, id);
+ onInserted();
+ setOpen(false);
+ router.refresh();
+ } finally {
+ setInserting(null);
+ }
+ }
+
+ async function remove(id: number) {
+ if (!window.confirm("Delete this template?")) return;
+ await deleteBlockTemplate(id);
+ setTemplates((prev) => prev.filter((t) => t.id !== id));
+ }
+
+ return (
+ <>
+ <button
+ onClick={openModal}
+ className="px-2 py-1 text-xs text-ink bg-surface hover:bg-hover transition-colors cursor-pointer inline-flex items-center gap-1"
+ title="Insert from template"
+ >
+ <BookOpen className="w-3 h-3" />
+ template
+ </button>
+ <Modal open={open} onClose={() => setOpen(false)} title="Insert block template">
+ <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+ {loading && (
+ <p className="text-mute text-sm py-6 text-center">Loading…</p>
+ )}
+ {!loading && templates.length === 0 && (
+ <p className="text-mute text-sm py-6 text-center">
+ No saved templates yet. Use the bookmark icon on a block to
+ save one.
+ </p>
+ )}
+ {templates.map((t) => (
+ <div
+ key={t.id}
+ className="flex items-center justify-between gap-2 p-2 border border-line"
+ >
+ <button
+ onClick={() => pick(t.id)}
+ disabled={inserting !== null}
+ className="flex-1 text-left disabled:opacity-50 cursor-pointer"
+ >
+ <div className="text-ink text-sm font-medium">{t.name}</div>
+ <div className="text-mute text-xs capitalize">
+ {t.blockType}
+ {t.label ? ` · ${t.label}` : ""}
+ </div>
+ </button>
+ <button
+ onClick={() => remove(t.id)}
+ className="p-1.5 text-mute hover:text-red-400 hover:bg-hover transition-colors cursor-pointer"
+ title="Delete template"
+ >
+ <Trash2 className="w-3.5 h-3.5" />
+ </button>
+ </div>
+ ))}
+ </div>
+ </Modal>
+ </>
  );
 }

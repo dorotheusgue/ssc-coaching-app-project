@@ -8,6 +8,7 @@ import {
  sessionTemplates,
  sessionBlocks,
  blockExercises,
+ blockTemplates,
 } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -386,4 +387,152 @@ export async function updateBlockExercise(
  .returning();
 
  return updated;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Block templates
+
+type BlockTemplatePayloadItem = {
+ exerciseId: number | null;
+ sets: number | null;
+ reps: string | null;
+ load: string | null;
+ percent1RM: number | null;
+ distance: number | null;
+ time: number | null;
+ restSeconds: number | null;
+ rpeTarget: number | null;
+ notes: string | null;
+ sortOrder: number;
+};
+
+export async function listBlockTemplates() {
+ const session = await auth();
+ if (!session?.user) return [];
+ const coachId = parseInt((session.user as { id: string }).id);
+ const rows = await db
+ .select()
+ .from(blockTemplates)
+ .where(eq(blockTemplates.coachId, coachId))
+ .orderBy(blockTemplates.name);
+ return rows;
+}
+
+export async function saveBlockAsTemplate(blockId: number, name: string) {
+ const session = await auth();
+ if (!session?.user) throw new Error("Unauthorized");
+ const coachId = parseInt((session.user as { id: string }).id);
+
+ const block = await db
+ .select()
+ .from(sessionBlocks)
+ .where(eq(sessionBlocks.id, blockId))
+ .get();
+ if (!block) throw new Error("Block not found");
+
+ const exs = await db
+ .select()
+ .from(blockExercises)
+ .where(eq(blockExercises.blockId, blockId))
+ .orderBy(blockExercises.sortOrder);
+
+ const payload: BlockTemplatePayloadItem[] = exs.map((e) => ({
+ exerciseId: e.exerciseId,
+ sets: e.sets,
+ reps: e.reps,
+ load: e.load,
+ percent1RM: e.percent1RM,
+ distance: e.distance,
+ time: e.time,
+ restSeconds: e.restSeconds,
+ rpeTarget: e.rpeTarget,
+ notes: e.notes,
+ sortOrder: e.sortOrder,
+ }));
+
+ const [created] = await db
+ .insert(blockTemplates)
+ .values({
+ coachId,
+ name: name.trim() || block.label || block.blockType,
+ blockType: block.blockType,
+ label: block.label,
+ payload,
+ })
+ .returning();
+
+ return created;
+}
+
+export async function insertBlockFromTemplate(
+ sessionTemplateId: number,
+ blockTemplateId: number
+) {
+ const session = await auth();
+ if (!session?.user) throw new Error("Unauthorized");
+ const coachId = parseInt((session.user as { id: string }).id);
+
+ const tpl = await db
+ .select()
+ .from(blockTemplates)
+ .where(
+ and(
+ eq(blockTemplates.id, blockTemplateId),
+ eq(blockTemplates.coachId, coachId)
+ )
+ )
+ .get();
+ if (!tpl) throw new Error("Template not found");
+
+ const existingBlocks = await db
+ .select({ id: sessionBlocks.id })
+ .from(sessionBlocks)
+ .where(eq(sessionBlocks.sessionTemplateId, sessionTemplateId));
+
+ const [block] = await db
+ .insert(sessionBlocks)
+ .values({
+ sessionTemplateId,
+ blockType: tpl.blockType as
+ | "warmup"
+ | "sprint"
+ | "strength"
+ | "accessory"
+ | "notes",
+ label: tpl.label,
+ sortOrder: existingBlocks.length,
+ })
+ .returning();
+
+ const items = (tpl.payload as BlockTemplatePayloadItem[]) ?? [];
+ if (items.length > 0) {
+ await db.insert(blockExercises).values(
+ items.map((it) => ({
+ blockId: block.id,
+ exerciseId: it.exerciseId,
+ sets: it.sets,
+ reps: it.reps,
+ load: it.load,
+ percent1RM: it.percent1RM,
+ distance: it.distance,
+ time: it.time,
+ restSeconds: it.restSeconds,
+ rpeTarget: it.rpeTarget,
+ notes: it.notes,
+ sortOrder: it.sortOrder,
+ }))
+ );
+ }
+
+ return block;
+}
+
+export async function deleteBlockTemplate(id: number) {
+ const session = await auth();
+ if (!session?.user) throw new Error("Unauthorized");
+ const coachId = parseInt((session.user as { id: string }).id);
+ await db
+ .delete(blockTemplates)
+ .where(and(eq(blockTemplates.id, id), eq(blockTemplates.coachId, coachId)));
+ return { ok: true };
 }

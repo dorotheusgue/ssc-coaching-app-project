@@ -68,6 +68,15 @@ export default function CalendarClient({
  const [assignLoading, setAssignLoading] = useState(false);
  const [assignError, setAssignError] = useState("");
  const [colorBy, setColorBy] = useState<"status" | "athlete">("status");
+ const [draggingSessionId, setDraggingSessionId] = useState<number | null>(null);
+ const [dragOverDate, setDragOverDate] = useState<string | null>(null);
+
+ async function handleDropOnDate(sessionId: number, newDate: string) {
+ const current = sessions.find((s) => s.id === sessionId);
+ if (!current || current.date === newDate) return;
+ await rescheduleSessionAction(sessionId, newDate);
+ router.refresh();
+ }
 
  // Stable monochrome tints, hashed off athleteId.
  const ATHLETE_TINTS = [
@@ -252,6 +261,7 @@ export default function CalendarClient({
  const dateStr = format(day, "yyyy-MM-dd");
  const daySessions = sessionsByDate[dateStr] ?? [];
  const today = isToday(day);
+ const isDropTarget = dragOverDate === dateStr;
  return (
  <div
  key={dateStr}
@@ -259,9 +269,30 @@ export default function CalendarClient({
  setSelectedDay(dateStr);
  setSelectedDaySessions(new Set());
  }}
+ onDragOver={(e) => {
+ if (draggingSessionId !== null) {
+ e.preventDefault();
+ e.dataTransfer.dropEffect = "move";
+ if (dragOverDate !== dateStr) setDragOverDate(dateStr);
+ }
+ }}
+ onDragLeave={() => {
+ if (dragOverDate === dateStr) setDragOverDate(null);
+ }}
+ onDrop={(e) => {
+ e.preventDefault();
+ const id = draggingSessionId;
+ setDragOverDate(null);
+ setDraggingSessionId(null);
+ if (id !== null) {
+ void handleDropOnDate(id, dateStr);
+ }
+ }}
  className={`min-h-28 p-2 border-r border-b border-line cursor-pointer hover:bg-hover transition-colors ${
  today ? "bg-surface ring-1 ring-ink/30" : ""
- } ${selectedDay === dateStr ? "bg-surface" : ""}`}
+ } ${selectedDay === dateStr ? "bg-surface" : ""} ${
+ isDropTarget ? "ring-2 ring-ink bg-ink/5" : ""
+ }`}
  >
  <div
  className={`text-sm font-medium mb-1 ${
@@ -280,10 +311,30 @@ export default function CalendarClient({
  : s.status === "in_progress"
  ? "bg-ink/15 text-ink"
  : "bg-surface text-ink";
+ const dragging = draggingSessionId === s.id;
  return (
  <div
  key={s.id}
- className={`text-xs px-1.5 py-0.5 truncate ${tint}`}
+ draggable
+ onDragStart={(e) => {
+ e.stopPropagation();
+ setDraggingSessionId(s.id);
+ e.dataTransfer.effectAllowed = "move";
+ e.dataTransfer.setData("text/plain", String(s.id));
+ }}
+ onDragEnd={() => {
+ setDraggingSessionId(null);
+ setDragOverDate(null);
+ }}
+ onClick={(e) => {
+ e.stopPropagation();
+ setSelectedDay(dateStr);
+ setSelectedDaySessions(new Set());
+ }}
+ className={`text-xs px-1.5 py-0.5 truncate cursor-grab active:cursor-grabbing ${tint} ${
+ dragging ? "opacity-40" : ""
+ }`}
+ title="Drag to reschedule"
  >
  {s.athleteName.split(" ")[0]}: {s.label}
  </div>

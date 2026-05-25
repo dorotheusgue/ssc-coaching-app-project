@@ -265,3 +265,15 @@ export const media = sqliteTable("media", {
  caption: text("caption"),
  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });
+
+export const blockTemplates = sqliteTable("block_templates", {
+ id: integer("id").primaryKey({ autoIncrement: true }),
+ coachId: integer("coach_id").notNull().references(() => users.id),
+ name: text("name").notNull(),
+ blockType: text("block_type").notNull(),
+ label: text("label"),
+ // JSON array of { exerciseId, sets, reps, load, percent1RM, distance, time,
+ // restSeconds, rpeTarget, notes, sortOrder }
+ payload: text("payload", { mode: "json" }).notNull(),
+ createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+});
