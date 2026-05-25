@@ -34,9 +34,22 @@ export async function registerAction(formData: FormData) {
  const email = formData.get("email") as string;
  const password = formData.get("password") as string;
  const role = (formData.get("role") as string) || "coach";
+ const inviteCode = (formData.get("inviteCode") as string) || "";
 
  if (!name || !email || !password) {
  return { success: false, error: "All fields are required" };
+ }
+
+ // Gate coach signup behind COACH_INVITE_CODE when one is configured.
+ // Empty / unset env means anyone can self-register as a coach (dev mode).
+ if (role === "coach") {
+ const required = process.env.COACH_INVITE_CODE?.trim() ?? "";
+ if (required && inviteCode.trim() !== required) {
+ return {
+ success: false,
+ error: "Invalid coach invite code.",
+ };
+ }
  }
 
  const existing = await db

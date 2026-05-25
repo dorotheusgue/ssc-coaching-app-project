@@ -8,7 +8,9 @@ import {
  programs,
  assignedSessions,
  readinessEntries,
+ programAssignments,
 } from "@/db/schema";
+import { OnboardingChecklist } from "./OnboardingChecklist";
 import { eq, and, desc, gte, count, avg } from "drizzle-orm";
 import {
  Users,
@@ -44,6 +46,11 @@ export default async function DashboardPage() {
  .select({ value: count() })
  .from(programs)
  .where(eq(programs.coachId, coachId));
+
+ const [assignmentCount] = await db
+ .select({ value: count() })
+ .from(programAssignments)
+ .where(eq(programAssignments.coachId, coachId));
 
  const [avgReadiness] = await db
  .select({
@@ -168,6 +175,12 @@ export default async function DashboardPage() {
  </Link>
  </div>
  </div>
+
+ <OnboardingChecklist
+ hasAthlete={athleteCount.value > 0}
+ hasProgram={programCount.value > 0}
+ hasAssignment={assignmentCount.value > 0}
+ />
 
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
  {kpis.map((kpi) => {

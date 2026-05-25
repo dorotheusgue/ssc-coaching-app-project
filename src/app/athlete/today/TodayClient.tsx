@@ -36,6 +36,7 @@ import {
  swapBlockExerciseAction,
 } from "./actions";
 import { sendMessageAction } from "@/app/coach/messages/actions";
+import { WelcomeModal } from "./WelcomeModal";
 
 type SessionExercise = {
  id: number;
@@ -1197,6 +1198,7 @@ export default function TodayClient({
 
  return (
  <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-6">
+ <WelcomeModal enabled={!todayReadiness && !lastReadiness} />
  {timer && (
  <TimerBanner state={timer} onSkip={skipTimer} onClose={stopTimer} />
  )}

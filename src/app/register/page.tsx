@@ -11,6 +11,7 @@ export default function RegisterPage() {
  const [email, setEmail] = useState("");
  const [password, setPassword] = useState("");
  const [role, setRole] = useState<"coach" | "athlete">("coach");
+ const [inviteCode, setInviteCode] = useState("");
  const [error, setError] = useState("");
  const [loading, setLoading] = useState(false);
 
@@ -26,6 +27,7 @@ export default function RegisterPage() {
  formData.set("email", email);
  formData.set("password", password);
  formData.set("role", role);
+ formData.set("inviteCode", inviteCode);
 
  const result = await registerAction(formData);
 
@@ -145,6 +147,29 @@ export default function RegisterPage() {
  </button>
  </div>
  </div>
+
+ {role === "coach" && (
+ <div>
+ <label
+ htmlFor="inviteCode"
+ className="block text-sm font-medium text-ink mb-1.5"
+ >
+ Coach invite code
+ </label>
+ <input
+ id="inviteCode"
+ type="text"
+ value={inviteCode}
+ onChange={(e) => setInviteCode(e.target.value)}
+ className="w-full bg-surface border border-line px-4 py-2.5 text-ink placeholder:text-faint outline-none focus:border-line focus:ring-1 focus:ring-ink transition-colors"
+ placeholder="Leave blank in dev"
+ autoComplete="off"
+ />
+ <p className="text-xs text-faint mt-1">
+ Required by your team admin. Skip if you weren't given one.
+ </p>
+ </div>
+ )}
 
  <button
  type="submit"
