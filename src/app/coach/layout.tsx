@@ -23,7 +23,7 @@ export default async function CoachLayout({
   const unreadMessages = userId ? await getUnreadMessageCount(userId) : 0;
 
   return (
-    <div className="min-h-screen bg-neutral-900">
+    <div className="min-h-screen bg-bg">
       <Sidebar unreadMessages={unreadMessages} />
       <main className="lg:pl-64">
         <div className="px-4 py-6 sm:px-6 lg:px-8">{children}</div>

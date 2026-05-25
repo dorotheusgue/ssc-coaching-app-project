@@ -73,7 +73,7 @@ export function EditProfileButton({ profile }: { profile: Profile }) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="p-1.5 rounded-lg hover:bg-neutral-700 text-neutral-400 hover:text-white transition-colors"
+        className="p-1.5 rounded-lg hover:bg-hover text-mute hover:text-ink transition-colors"
         title="Edit profile"
       >
         <Pencil className="w-4 h-4" />
@@ -88,13 +88,13 @@ export function EditProfileButton({ profile }: { profile: Profile }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1">
+              <label className="block text-sm font-medium text-ink mb-1">
                 Sport
               </label>
               <select
                 value={sport}
                 onChange={(e) => setSport(e.target.value)}
-                className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
                 <option value="">—</option>
                 {SPORTS.map((s) => (
@@ -105,7 +105,7 @@ export function EditProfileButton({ profile }: { profile: Profile }) {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1">
+              <label className="block text-sm font-medium text-ink mb-1">
                 Event
               </label>
               <input
@@ -113,25 +113,25 @@ export function EditProfileButton({ profile }: { profile: Profile }) {
                 value={event}
                 onChange={(e) => setEvent(e.target.value)}
                 placeholder="100m, Shot Put..."
-                className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1">
+              <label className="block text-sm font-medium text-ink mb-1">
                 DOB
               </label>
               <input
                 type="date"
                 value={dateOfBirth}
                 onChange={(e) => setDateOfBirth(e.target.value)}
-                className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1">
+              <label className="block text-sm font-medium text-ink mb-1">
                 Height (cm)
               </label>
               <input
@@ -139,11 +139,11 @@ export function EditProfileButton({ profile }: { profile: Profile }) {
                 step="0.1"
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
-                className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1">
+              <label className="block text-sm font-medium text-ink mb-1">
                 Weight (kg)
               </label>
               <input
@@ -151,20 +151,20 @@ export function EditProfileButton({ profile }: { profile: Profile }) {
                 step="0.1"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
-                className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">
+            <label className="block text-sm font-medium text-ink mb-1">
               Notes
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-y"
+              className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-y"
             />
           </div>
 

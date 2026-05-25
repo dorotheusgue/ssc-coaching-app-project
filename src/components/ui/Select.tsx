@@ -22,7 +22,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
         {label && (
           <label
             htmlFor={selectId}
-            className="block text-sm font-medium text-neutral-300 mb-1.5"
+            className="block text-sm font-medium text-ink mb-1.5"
           >
             {label}
           </label>
@@ -32,7 +32,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
             ref={ref}
             id={selectId}
             className={cn(
-              "w-full appearance-none rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 pr-8 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors",
+              "w-full appearance-none rounded-lg border border-line bg-bg px-3 py-2 pr-8 text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors",
               className
             )}
             {...props}
@@ -48,7 +48,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
               </option>
             ))}
           </select>
-          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-mute" />
         </div>
       </div>
     );

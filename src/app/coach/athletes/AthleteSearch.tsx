@@ -32,21 +32,21 @@ export function AthleteSearch({ athletes }: AthleteSearchProps) {
   return (
     <div className="space-y-4">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-faint" />
         <input
           type="text"
           placeholder="Search athletes by name, email, or sport..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm"
+          className="w-full pl-10 pr-4 py-2.5 bg-surface border border-line rounded-lg text-ink placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm"
         />
       </div>
 
       {filtered.length === 0 ? (
         <Card>
           <div className="text-center py-8">
-            <User className="w-10 h-10 text-neutral-600 mx-auto mb-3" />
-            <p className="text-neutral-400">
+            <User className="w-10 h-10 text-faint mx-auto mb-3" />
+            <p className="text-mute">
               {query ? "No athletes match your search." : "No athletes yet."}
             </p>
           </div>
@@ -56,20 +56,20 @@ export function AthleteSearch({ athletes }: AthleteSearchProps) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-neutral-700">
-                  <th className="text-left py-3 px-4 text-neutral-400 font-medium">
+                <tr className="border-b border-line">
+                  <th className="text-left py-3 px-4 text-mute font-medium">
                     Name
                   </th>
-                  <th className="text-left py-3 px-4 text-neutral-400 font-medium">
+                  <th className="text-left py-3 px-4 text-mute font-medium">
                     Email
                   </th>
-                  <th className="text-left py-3 px-4 text-neutral-400 font-medium">
+                  <th className="text-left py-3 px-4 text-mute font-medium">
                     Sport
                   </th>
-                  <th className="text-left py-3 px-4 text-neutral-400 font-medium">
+                  <th className="text-left py-3 px-4 text-mute font-medium">
                     Current Program
                   </th>
-                  <th className="text-left py-3 px-4 text-neutral-400 font-medium">
+                  <th className="text-left py-3 px-4 text-mute font-medium">
                     Last Session
                   </th>
                   <th className="py-3 px-4" />
@@ -79,22 +79,22 @@ export function AthleteSearch({ athletes }: AthleteSearchProps) {
                 {filtered.map((athlete) => (
                   <tr
                     key={athlete.id}
-                    className="border-b border-neutral-700/50 hover:bg-neutral-700/30"
+                    className="border-b border-line/50 hover:bg-hover/30"
                   >
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
                           <User className="w-4 h-4 text-emerald-500" />
                         </div>
-                        <span className="text-white font-medium">
+                        <span className="text-ink font-medium">
                           {athlete.name}
                         </span>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-neutral-300">
+                    <td className="py-3 px-4 text-ink">
                       {athlete.email}
                     </td>
-                    <td className="py-3 px-4 text-neutral-300">
+                    <td className="py-3 px-4 text-ink">
                       {athlete.sport ?? "—"}
                     </td>
                     <td className="py-3 px-4">
@@ -103,10 +103,10 @@ export function AthleteSearch({ athletes }: AthleteSearchProps) {
                           {athlete.currentProgram}
                         </span>
                       ) : (
-                        <span className="text-neutral-500">None</span>
+                        <span className="text-faint">None</span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-neutral-300">
+                    <td className="py-3 px-4 text-ink">
                       {athlete.lastSessionDate ?? "—"}
                     </td>
                     <td className="py-3 px-4">

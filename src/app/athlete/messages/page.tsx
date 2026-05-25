@@ -57,7 +57,7 @@ export default async function AthleteMessagesPage() {
 
   if (!convo) {
     return (
-      <div className="flex items-center justify-center h-[60vh] text-neutral-500">
+      <div className="flex items-center justify-center h-[60vh] text-faint">
         <p>No coach assigned yet.</p>
       </div>
     );

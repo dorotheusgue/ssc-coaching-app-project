@@ -29,12 +29,12 @@ export default async function ProgramsPage() {
     .all();
 
   return (
-    <div className="min-h-screen bg-neutral-900 text-white">
+    <div className="min-h-screen bg-bg text-ink">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold">Programs</h1>
-            <p className="text-neutral-400 mt-1">
+            <p className="text-mute mt-1">
               {allPrograms.length} program{allPrograms.length !== 1 ? "s" : ""}
             </p>
           </div>
@@ -43,11 +43,11 @@ export default async function ProgramsPage() {
 
         {allPrograms.length === 0 ? (
           <div className="text-center py-20">
-            <FileText className="w-16 h-16 text-neutral-600 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-neutral-300 mb-2">
+            <FileText className="w-16 h-16 text-faint mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-ink mb-2">
               No programs yet
             </h2>
-            <p className="text-neutral-500 mb-6">
+            <p className="text-faint mb-6">
               Create your first training program to get started
             </p>
             <CreateProgramButton coachId={coachId} />
@@ -58,7 +58,7 @@ export default async function ProgramsPage() {
               <Link
                 key={program.id}
                 href={`/coach/programs/${program.id}`}
-                className="bg-neutral-800 border border-neutral-700 rounded-xl p-5 hover:border-neutral-600 transition-colors group"
+                className="bg-surface border border-line rounded-xl p-5 hover:border-line transition-colors group"
               >
                 <div className="flex items-start justify-between mb-3">
                   <span
@@ -67,21 +67,21 @@ export default async function ProgramsPage() {
                         ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
                         : program.status === "draft"
                           ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
-                          : "bg-neutral-500/20 text-neutral-400 border-neutral-500/30"
+                          : "bg-mute/20 text-mute border-mute/30"
                     }`}
                   >
                     {program.status}
                   </span>
                 </div>
 
-                <h3 className="text-white font-semibold text-lg mb-1.5 group-hover:text-emerald-400 transition-colors">
+                <h3 className="text-ink font-semibold text-lg mb-1.5 group-hover:text-emerald-400 transition-colors">
                   {program.name}
                 </h3>
-                <p className="text-neutral-400 text-sm mb-4 line-clamp-2">
+                <p className="text-mute text-sm mb-4 line-clamp-2">
                   {program.description || "No description"}
                 </p>
 
-                <div className="flex items-center gap-4 text-sm text-neutral-500">
+                <div className="flex items-center gap-4 text-sm text-faint">
                   <span>
                     {program.phaseCount} phase{program.phaseCount !== 1 ? "s" : ""}
                   </span>

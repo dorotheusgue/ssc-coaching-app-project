@@ -111,7 +111,7 @@ function ReadinessButtons({
     <div className="space-y-1.5">
       <div className="flex items-center gap-2">
         <Icon className={`w-4 h-4 ${color}`} />
-        <span className="text-sm text-neutral-300">{label}</span>
+        <span className="text-sm text-ink">{label}</span>
       </div>
       <div className="flex gap-1.5">
         {[1, 2, 3, 4, 5].map((n) => (
@@ -121,15 +121,15 @@ function ReadinessButtons({
             onClick={() => onChange(n)}
             className={`flex-1 py-2 rounded-lg text-sm font-semibold border transition-colors cursor-pointer ${
               value === n
-                ? "bg-emerald-500 border-emerald-500 text-white"
-                : "bg-neutral-700/50 border-neutral-700 text-neutral-300 hover:bg-neutral-700"
+                ? "bg-emerald-500 border-emerald-500 text-ink"
+                : "bg-surface/50 border-line text-ink hover:bg-hover"
             }`}
           >
             {n}
           </button>
         ))}
       </div>
-      <div className="flex justify-between text-[10px] text-neutral-500 px-1">
+      <div className="flex justify-between text-[10px] text-faint px-1">
         <span>{lowLabel}</span>
         <span>{highLabel}</span>
       </div>
@@ -221,7 +221,7 @@ function ExerciseLogCard({
   const Icon = icon;
 
   return (
-    <div className="bg-neutral-750 rounded-lg border border-neutral-700">
+    <div className="bg-surface rounded-lg border border-line">
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center justify-between p-4 text-left"
@@ -229,8 +229,8 @@ function ExerciseLogCard({
         <div className="flex items-center gap-3">
           <Icon className="w-5 h-5 text-emerald-400" />
           <div>
-            <div className="text-white font-medium">{exercise.exerciseName}</div>
-            <div className="text-neutral-400 text-sm">
+            <div className="text-ink font-medium">{exercise.exerciseName}</div>
+            <div className="text-mute text-sm">
               {exercise.sets && `${exercise.sets} sets`}
               {exercise.reps && ` x ${exercise.reps} reps`}
               {exercise.load && ` @ ${exercise.load}`}
@@ -253,9 +253,9 @@ function ExerciseLogCard({
               Start
             </span>
           ) : expanded ? (
-            <ChevronUp className="w-4 h-4 text-neutral-400" />
+            <ChevronUp className="w-4 h-4 text-mute" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-neutral-400" />
+            <ChevronDown className="w-4 h-4 text-mute" />
           )}
         </div>
       </button>
@@ -266,7 +266,7 @@ function ExerciseLogCard({
               {exerciseLogs.map((log, i) => (
                 <div
                   key={log.id}
-                  className="flex items-center gap-2 text-sm text-neutral-300"
+                  className="flex items-center gap-2 text-sm text-ink"
                 >
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                   <span>Set {i + 1}:</span>
@@ -287,14 +287,14 @@ function ExerciseLogCard({
                   placeholder="Reps"
                   value={reps}
                   onChange={(e) => setReps(e.target.value)}
-                  className="bg-neutral-700 border border-neutral-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="bg-surface border border-line rounded px-3 py-2 text-ink text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 />
                 <input
                   type="number"
                   placeholder="Load (kg)"
                   value={load}
                   onChange={(e) => setLoad(e.target.value)}
-                  className="bg-neutral-700 border border-neutral-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="bg-surface border border-line rounded px-3 py-2 text-ink text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 />
               </>
             )}
@@ -304,7 +304,7 @@ function ExerciseLogCard({
                 placeholder="Distance (m)"
                 value={distance}
                 onChange={(e) => setDistance(e.target.value)}
-                className="bg-neutral-700 border border-neutral-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="bg-surface border border-line rounded px-3 py-2 text-ink text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
               />
             )}
             {exercise.trackingType === "time" && (
@@ -314,7 +314,7 @@ function ExerciseLogCard({
                 placeholder="Time (s)"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="bg-neutral-700 border border-neutral-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="bg-surface border border-line rounded px-3 py-2 text-ink text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
               />
             )}
             <input
@@ -324,7 +324,7 @@ function ExerciseLogCard({
               max="10"
               value={rpe}
               onChange={(e) => setRpe(e.target.value)}
-              className="bg-neutral-700 border border-neutral-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="bg-surface border border-line rounded px-3 py-2 text-ink text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
           </div>
           <Button onClick={handleLogSet} disabled={isPending} size="sm" className="w-full">
@@ -362,9 +362,9 @@ function SessionProgress({ session }: { session: SessionData }) {
       : Math.round((completedExercises / totalExercises) * 100);
 
   return (
-    <div className="bg-neutral-800 rounded-xl border border-neutral-700 p-6">
+    <div className="bg-surface rounded-xl border border-line p-6">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
           <Zap className="w-5 h-5 text-yellow-400" />
           {session.label}
         </h2>
@@ -381,16 +381,16 @@ function SessionProgress({ session }: { session: SessionData }) {
         </Badge>
       </div>
       {session.notes && (
-        <p className="text-neutral-400 text-sm mb-3">{session.notes}</p>
+        <p className="text-mute text-sm mb-3">{session.notes}</p>
       )}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-neutral-400">
+          <span className="text-mute">
             {completedExercises} of {totalExercises} exercises
           </span>
           <span className="text-emerald-400 font-medium">{pct}%</span>
         </div>
-        <div className="h-2 w-full bg-neutral-700 rounded-full overflow-hidden">
+        <div className="h-2 w-full bg-surface rounded-full overflow-hidden">
           <div
             className="h-full bg-emerald-500 transition-all"
             style={{ width: `${pct}%` }}
@@ -564,12 +564,12 @@ export default function TodayClient({
     return (
       <div className="max-w-2xl mx-auto p-4 sm:p-6">
         <div className="text-center py-16">
-          <Sun className="w-16 h-16 text-neutral-600 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-white mb-2">
+          <Sun className="w-16 h-16 text-faint mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-ink mb-2">
             {greeting}, {userName}
           </h1>
-          <p className="text-neutral-400 mb-6">No training scheduled for today.</p>
-          <p className="text-neutral-500 text-sm">Rest and recover. Check your calendar for upcoming sessions.</p>
+          <p className="text-mute mb-6">No training scheduled for today.</p>
+          <p className="text-faint text-sm">Rest and recover. Check your calendar for upcoming sessions.</p>
         </div>
       </div>
     );
@@ -587,7 +587,7 @@ export default function TodayClient({
             <div className="text-xs text-emerald-400 font-medium uppercase tracking-wider">
               Resting
             </div>
-            <div className="text-sm text-white truncate">
+            <div className="text-sm text-ink truncate">
               {rest.exerciseName}
             </div>
             <div className="h-1 w-full bg-emerald-900/50 rounded-full overflow-hidden mt-1.5">
@@ -601,17 +601,17 @@ export default function TodayClient({
           </div>
           <button
             onClick={cancelRest}
-            className="text-emerald-300 hover:text-white text-xs font-medium px-2 py-1 rounded hover:bg-emerald-500/20 transition-colors cursor-pointer"
+            className="text-emerald-300 hover:text-ink text-xs font-medium px-2 py-1 rounded hover:bg-emerald-500/20 transition-colors cursor-pointer"
           >
             Skip
           </button>
         </div>
       )}
       <div>
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className="text-2xl font-bold text-ink">
           {greeting}, {userName}
         </h1>
-        <p className="text-neutral-400 text-sm mt-1">
+        <p className="text-mute text-sm mt-1">
           {new Date(today + "T12:00:00").toLocaleDateString("en-US", {
             weekday: "long",
             month: "long",
@@ -636,13 +636,13 @@ export default function TodayClient({
             <ReadinessButtons label="Stress" value={6 - stress} onChange={(v) => setStress(6 - v)} icon={Brain} color="text-purple-400" lowLabel="High" highLabel="Calm" />
             <ReadinessButtons label="Mood" value={mood} onChange={setMood} icon={Sun} color="text-emerald-400" lowLabel="Low" highLabel="Great" />
             <div>
-              <label className="block text-sm text-neutral-300 mb-1">Notes</label>
+              <label className="block text-sm text-ink mb-1">Notes</label>
               <textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 rows={2}
                 placeholder="How are you feeling?"
-                className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
               />
             </div>
             <Button onClick={handleSaveReadiness} disabled={isPending} className="w-full">
@@ -653,7 +653,7 @@ export default function TodayClient({
       </Card>
 
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-white">Session</h2>
+        <h2 className="text-lg font-semibold text-ink">Session</h2>
         {session.blocks.map((block) => (
           <div key={block.id} className="space-y-3">
             <div className="flex items-center gap-2">
@@ -661,7 +661,7 @@ export default function TodayClient({
                 {block.blockType}
               </Badge>
               {block.label && (
-                <span className="text-neutral-300 text-sm font-medium">{block.label}</span>
+                <span className="text-ink text-sm font-medium">{block.label}</span>
               )}
             </div>
             {block.exercises.map((exercise) => (
@@ -679,8 +679,8 @@ export default function TodayClient({
       </div>
 
       {conversationId && (
-        <div className="bg-neutral-800 border border-neutral-700 rounded-xl p-4 space-y-3">
-          <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+        <div className="bg-surface border border-line rounded-xl p-4 space-y-3">
+          <h2 className="text-sm font-semibold text-ink flex items-center gap-2">
             <MessageSquare className="w-4 h-4 text-emerald-400" />
             Notes for coach
           </h2>
@@ -696,8 +696,8 @@ export default function TodayClient({
                     <div
                       className={`max-w-[80%] px-3 py-1.5 rounded-2xl text-sm ${
                         mine
-                          ? "bg-emerald-600 text-white"
-                          : "bg-neutral-700 text-white"
+                          ? "bg-emerald-600 text-ink"
+                          : "bg-surface text-ink"
                       }`}
                     >
                       {m.text}
@@ -714,7 +714,7 @@ export default function TodayClient({
               onChange={(e) => setChatText(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendSessionMessage()}
               placeholder="Tell your coach how it went..."
-              className="flex-1 bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="flex-1 bg-surface border border-line rounded-lg px-3 py-2 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
             <Button
               onClick={sendSessionMessage}

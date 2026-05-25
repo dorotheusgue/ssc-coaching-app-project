@@ -39,7 +39,7 @@ interface TabListProps {
 
 function TabList({ children, className }: TabListProps) {
   return (
-    <div className={cn("flex border-b border-neutral-700", className)}>
+    <div className={cn("flex border-b border-line", className)}>
       {children}
     </div>
   );
@@ -62,7 +62,7 @@ function TabTrigger({ value, children, className }: TabTriggerProps) {
         "px-4 py-2.5 text-sm font-medium transition-colors relative cursor-pointer",
         isActive
           ? "text-emerald-400"
-          : "text-neutral-400 hover:text-neutral-200",
+          : "text-mute hover:text-ink",
         className
       )}
     >

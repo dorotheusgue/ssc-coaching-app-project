@@ -96,7 +96,7 @@ export function AthleteDetailClient({
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-1 border-b border-neutral-700">
+      <div className="flex gap-1 border-b border-line">
         {tabs.map((tab) => (
           <button
             key={tab}
@@ -104,7 +104,7 @@ export function AthleteDetailClient({
             className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 cursor-pointer ${
               activeTab === tab
                 ? "border-emerald-500 text-emerald-500"
-                : "border-transparent text-neutral-400 hover:text-white"
+                : "border-transparent text-mute hover:text-ink"
             }`}
           >
             {tab}
@@ -122,10 +122,10 @@ export function AthleteDetailClient({
                     <Activity className="w-4 h-4 text-emerald-500" />
                   </div>
                   <div>
-                    <p className="text-white font-medium">
+                    <p className="text-ink font-medium">
                       {activeAssignment.programName}
                     </p>
-                    <p className="text-xs text-neutral-400">
+                    <p className="text-xs text-mute">
                       Started {activeAssignment.startDate}
                     </p>
                   </div>
@@ -135,7 +135,7 @@ export function AthleteDetailClient({
                 </span>
               </div>
             ) : (
-              <p className="text-neutral-400 text-sm">
+              <p className="text-mute text-sm">
                 No active program assigned.
               </p>
             )}
@@ -148,14 +148,14 @@ export function AthleteDetailClient({
                   <Calendar className="w-4 h-4 text-blue-500" />
                 </div>
                 <div>
-                  <p className="text-white font-medium">{nextSession.label}</p>
-                  <p className="text-xs text-neutral-400">
+                  <p className="text-ink font-medium">{nextSession.label}</p>
+                  <p className="text-xs text-mute">
                     {nextSession.date}
                   </p>
                 </div>
               </div>
             ) : (
-              <p className="text-neutral-400 text-sm">
+              <p className="text-mute text-sm">
                 No upcoming sessions scheduled.
               </p>
             )}
@@ -163,13 +163,13 @@ export function AthleteDetailClient({
 
           <Card title="Recent Activity" className="lg:col-span-2">
             {recentSessions.length === 0 ? (
-              <p className="text-neutral-400 text-sm">No recent activity.</p>
+              <p className="text-mute text-sm">No recent activity.</p>
             ) : (
               <div className="space-y-2">
                 {recentSessions.map((s) => (
                   <div
                     key={s.id}
-                    className="flex items-center justify-between py-2 border-b border-neutral-700/50 last:border-0"
+                    className="flex items-center justify-between py-2 border-b border-line/50 last:border-0"
                   >
                     <div className="flex items-center gap-3">
                       <div
@@ -180,14 +180,14 @@ export function AthleteDetailClient({
                               ? "bg-blue-500"
                               : s.status === "skipped"
                                 ? "bg-red-500"
-                                : "bg-neutral-500"
+                                : "bg-mute"
                         }`}
                       />
-                      <span className="text-sm text-white">{s.label}</span>
+                      <span className="text-sm text-ink">{s.label}</span>
                     </div>
-                    <div className="flex items-center gap-3 text-sm text-neutral-400">
+                    <div className="flex items-center gap-3 text-sm text-mute">
                       <span>{s.date}</span>
-                      <span className="capitalize text-xs px-2 py-0.5 rounded bg-neutral-700">
+                      <span className="capitalize text-xs px-2 py-0.5 rounded bg-surface">
                         {s.status}
                       </span>
                     </div>
@@ -202,22 +202,22 @@ export function AthleteDetailClient({
       {activeTab === "Sessions" && (
         <Card>
           {allSessions.length === 0 ? (
-            <p className="text-neutral-400 text-sm py-4">No sessions found.</p>
+            <p className="text-mute text-sm py-4">No sessions found.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-neutral-700">
-                    <th className="text-left py-3 px-4 text-neutral-400 font-medium">
+                  <tr className="border-b border-line">
+                    <th className="text-left py-3 px-4 text-mute font-medium">
                       Session
                     </th>
-                    <th className="text-left py-3 px-4 text-neutral-400 font-medium">
+                    <th className="text-left py-3 px-4 text-mute font-medium">
                       Date
                     </th>
-                    <th className="text-left py-3 px-4 text-neutral-400 font-medium">
+                    <th className="text-left py-3 px-4 text-mute font-medium">
                       Status
                     </th>
-                    <th className="text-left py-3 px-4 text-neutral-400 font-medium">
+                    <th className="text-left py-3 px-4 text-mute font-medium">
                       Completed
                     </th>
                   </tr>
@@ -226,10 +226,10 @@ export function AthleteDetailClient({
                   {allSessions.map((s) => (
                     <tr
                       key={s.id}
-                      className="border-b border-neutral-700/50 hover:bg-neutral-700/30"
+                      className="border-b border-line/50 hover:bg-hover/30"
                     >
-                      <td className="py-3 px-4 text-white">{s.label}</td>
-                      <td className="py-3 px-4 text-neutral-300">{s.date}</td>
+                      <td className="py-3 px-4 text-ink">{s.label}</td>
+                      <td className="py-3 px-4 text-ink">{s.date}</td>
                       <td className="py-3 px-4">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -245,7 +245,7 @@ export function AthleteDetailClient({
                           {s.status}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-neutral-300">
+                      <td className="py-3 px-4 text-ink">
                         {s.completedAt
                           ? new Date(s.completedAt).toLocaleString()
                           : "—"}
@@ -263,7 +263,7 @@ export function AthleteDetailClient({
         <div className="space-y-6">
           <Card title="Readiness Trends (Last 14 Entries)">
             {readinessChartData.length === 0 ? (
-              <p className="text-neutral-400 text-sm py-4">
+              <p className="text-mute text-sm py-4">
                 No readiness data available.
               </p>
             ) : (
@@ -318,30 +318,30 @@ export function AthleteDetailClient({
 
           <Card title="Readiness History">
             {recentReadiness.length === 0 ? (
-              <p className="text-neutral-400 text-sm py-4">
+              <p className="text-mute text-sm py-4">
                 No readiness entries found.
               </p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-neutral-700">
-                      <th className="text-left py-3 px-4 text-neutral-400 font-medium">
+                    <tr className="border-b border-line">
+                      <th className="text-left py-3 px-4 text-mute font-medium">
                         Date
                       </th>
-                      <th className="text-center py-3 px-4 text-neutral-400 font-medium">
+                      <th className="text-center py-3 px-4 text-mute font-medium">
                         Sleep
                       </th>
-                      <th className="text-center py-3 px-4 text-neutral-400 font-medium">
+                      <th className="text-center py-3 px-4 text-mute font-medium">
                         Fatigue
                       </th>
-                      <th className="text-center py-3 px-4 text-neutral-400 font-medium">
+                      <th className="text-center py-3 px-4 text-mute font-medium">
                         Soreness
                       </th>
-                      <th className="text-center py-3 px-4 text-neutral-400 font-medium">
+                      <th className="text-center py-3 px-4 text-mute font-medium">
                         Stress
                       </th>
-                      <th className="text-center py-3 px-4 text-neutral-400 font-medium">
+                      <th className="text-center py-3 px-4 text-mute font-medium">
                         Mood
                       </th>
                     </tr>
@@ -350,9 +350,9 @@ export function AthleteDetailClient({
                     {recentReadiness.map((r) => (
                       <tr
                         key={r.id}
-                        className="border-b border-neutral-700/50 hover:bg-neutral-700/30"
+                        className="border-b border-line/50 hover:bg-hover/30"
                       >
-                        <td className="py-3 px-4 text-white">{r.date}</td>
+                        <td className="py-3 px-4 text-ink">{r.date}</td>
                         <td className="py-3 px-4 text-center text-emerald-500">
                           {r.sleepQuality}
                         </td>
@@ -381,7 +381,7 @@ export function AthleteDetailClient({
       {activeTab === "Progress" && (
         <Card title="Session Completion Progress">
           {progressData.length === 0 ? (
-            <p className="text-neutral-400 text-sm py-4">
+            <p className="text-mute text-sm py-4">
               No completed sessions to show progress.
             </p>
           ) : (
@@ -419,14 +419,14 @@ export function AthleteDetailClient({
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-neutral-700">
-                      <th className="text-left py-3 px-4 text-neutral-400 font-medium">
+                    <tr className="border-b border-line">
+                      <th className="text-left py-3 px-4 text-mute font-medium">
                         Session
                       </th>
-                      <th className="text-left py-3 px-4 text-neutral-400 font-medium">
+                      <th className="text-left py-3 px-4 text-mute font-medium">
                         Date
                       </th>
-                      <th className="text-left py-3 px-4 text-neutral-400 font-medium">
+                      <th className="text-left py-3 px-4 text-mute font-medium">
                         Cumulative
                       </th>
                     </tr>
@@ -435,10 +435,10 @@ export function AthleteDetailClient({
                     {completedSessions.map((s, i) => (
                       <tr
                         key={s.id}
-                        className="border-b border-neutral-700/50 hover:bg-neutral-700/30"
+                        className="border-b border-line/50 hover:bg-hover/30"
                       >
-                        <td className="py-3 px-4 text-white">{s.label}</td>
-                        <td className="py-3 px-4 text-neutral-300">{s.date}</td>
+                        <td className="py-3 px-4 text-ink">{s.label}</td>
+                        <td className="py-3 px-4 text-ink">{s.date}</td>
                         <td className="py-3 px-4 text-emerald-500 font-medium">
                           {completedSessions.length - i}
                         </td>

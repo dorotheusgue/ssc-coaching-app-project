@@ -90,7 +90,7 @@ export function InviteAthleteButton({ coachId }: { coachId: number }) {
             </div>
           )}
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">
+            <label className="block text-sm font-medium text-ink mb-1">
               Name
             </label>
             <input
@@ -98,11 +98,11 @@ export function InviteAthleteButton({ coachId }: { coachId: number }) {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">
+            <label className="block text-sm font-medium text-ink mb-1">
               Email
             </label>
             <input
@@ -110,19 +110,19 @@ export function InviteAthleteButton({ coachId }: { coachId: number }) {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1">
+              <label className="block text-sm font-medium text-ink mb-1">
                 Sport
               </label>
               <select
                 value={sport}
                 onChange={(e) => setSport(e.target.value)}
-                className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
                 <option value="">—</option>
                 {SPORTS.map((s) => (
@@ -133,7 +133,7 @@ export function InviteAthleteButton({ coachId }: { coachId: number }) {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1">
+              <label className="block text-sm font-medium text-ink mb-1">
                 Event
               </label>
               <input
@@ -141,25 +141,25 @@ export function InviteAthleteButton({ coachId }: { coachId: number }) {
                 value={event}
                 onChange={(e) => setEvent(e.target.value)}
                 placeholder="100m, Shot Put..."
-                className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1">
+              <label className="block text-sm font-medium text-ink mb-1">
                 Date of Birth
               </label>
               <input
                 type="date"
                 value={dateOfBirth}
                 onChange={(e) => setDateOfBirth(e.target.value)}
-                className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1">
+              <label className="block text-sm font-medium text-ink mb-1">
                 Height (cm)
               </label>
               <input
@@ -167,11 +167,11 @@ export function InviteAthleteButton({ coachId }: { coachId: number }) {
                 step="0.1"
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
-                className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1">
+              <label className="block text-sm font-medium text-ink mb-1">
                 Weight (kg)
               </label>
               <input
@@ -179,14 +179,14 @@ export function InviteAthleteButton({ coachId }: { coachId: number }) {
                 step="0.1"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
-                className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
           </div>
 
-          <p className="text-xs text-neutral-400">
+          <p className="text-xs text-mute">
             Initial password is{" "}
-            <code className="text-neutral-200">changeme123</code>. Ask the
+            <code className="text-ink">changeme123</code>. Ask the
             athlete to change it on first login.
           </p>
           <div className="flex justify-end gap-3 pt-2">

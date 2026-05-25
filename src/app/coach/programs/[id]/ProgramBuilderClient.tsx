@@ -107,7 +107,7 @@ const blockTypeColors: Record<string, string> = {
   sprint: "bg-blue-500/10 border-blue-500/30",
   strength: "bg-emerald-500/10 border-emerald-500/30",
   accessory: "bg-amber-500/10 border-amber-500/30",
-  notes: "bg-neutral-700/50 border-neutral-600",
+  notes: "bg-surface/50 border-line",
 };
 
 export default function ProgramBuilderClient({
@@ -396,20 +396,20 @@ export default function ProgramBuilderClient({
                 type="text"
                 value={editProgramName}
                 onChange={(e) => setEditProgramName(e.target.value)}
-                className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-white text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2 bg-surface border border-line rounded-lg text-ink text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
               <textarea
                 value={editProgramDesc}
                 onChange={(e) => setEditProgramDesc(e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                className="w-full px-3 py-2 bg-surface border border-line rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
                 placeholder="Program description..."
               />
               <div className="flex gap-3">
                 <select
                   value={editProgramStatus}
                   onChange={(e) => setEditProgramStatus(e.target.value)}
-                  className="px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="px-3 py-2 bg-surface border border-line rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 >
                   <option value="draft">Draft</option>
                   <option value="published">Published</option>
@@ -434,19 +434,19 @@ export default function ProgramBuilderClient({
                       ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
                       : program.status === "draft"
                         ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
-                        : "bg-neutral-500/20 text-neutral-400 border-neutral-500/30"
+                        : "bg-mute/20 text-mute border-mute/30"
                   }`}
                 >
                   {program.status}
                 </span>
                 <button
                   onClick={() => setEditingProgram(true)}
-                  className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-hover text-mute hover:text-ink transition-colors"
                 >
                   <Pencil className="w-4 h-4" />
                 </button>
               </div>
-              <p className="text-neutral-400">
+              <p className="text-mute">
                 {program.description || "No description"}
               </p>
             </div>
@@ -468,21 +468,21 @@ export default function ProgramBuilderClient({
       </div>
 
       {aiOpen && (
-        <div className="mb-6 bg-neutral-800 border border-emerald-500/30 rounded-xl p-5">
+        <div className="mb-6 bg-surface border border-emerald-500/30 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles className="w-4 h-4 text-emerald-400" />
-            <h2 className="text-sm font-semibold text-white">
+            <h2 className="text-sm font-semibold text-ink">
               Import program with AI
             </h2>
           </div>
-          <p className="text-xs text-neutral-400 mb-3">
+          <p className="text-xs text-mute mb-3">
             Upload a markdown file or paste an existing program below. The AI
             transcribes it into phases, sessions, and exercises — it will not
             invent content. Only exercises in your library are used. Up to 12
             weeks per import.
           </p>
           <div className="mb-3 flex items-center gap-2">
-            <label className="inline-flex items-center gap-2 px-3 py-1.5 bg-neutral-700 hover:bg-neutral-600 border border-neutral-600 rounded-lg text-xs font-medium text-white cursor-pointer transition-colors">
+            <label className="inline-flex items-center gap-2 px-3 py-1.5 bg-surface hover:bg-hover border border-line rounded-lg text-xs font-medium text-ink cursor-pointer transition-colors">
               <Upload className="w-3.5 h-3.5" />
               Upload markdown
               <input
@@ -494,16 +494,16 @@ export default function ProgramBuilderClient({
               />
             </label>
             {aiFileName && (
-              <span className="text-xs text-neutral-400">
+              <span className="text-xs text-mute">
                 Loaded:{" "}
-                <span className="text-neutral-200">{aiFileName}</span>
+                <span className="text-ink">{aiFileName}</span>
                 <button
                   type="button"
                   onClick={() => {
                     setAiFileName(null);
                     setAiPrompt("");
                   }}
-                  className="ml-2 text-neutral-500 hover:text-red-400 transition-colors"
+                  className="ml-2 text-faint hover:text-red-400 transition-colors"
                   disabled={aiLoading}
                 >
                   clear
@@ -520,10 +520,10 @@ export default function ProgramBuilderClient({
             rows={aiFileName ? 8 : 4}
             placeholder={`Paste your program here, or use Upload above. Example:\n\n# Week 1 — Acceleration\n## Monday\n### Sprint\n- Block Starts (10m): 4x10m, full rest\n- 30m Sprint: 3x30m, 4 min rest\n### Strength\n- Back Squat: 4x5 @ 80%\n- ...`}
             disabled={aiLoading}
-            className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-y disabled:opacity-50 font-mono"
+            className="w-full px-3 py-2 bg-bg border border-line rounded-lg text-ink text-sm placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-y disabled:opacity-50 font-mono"
           />
           <div className="flex items-center justify-between mt-3">
-            <div className="text-xs text-neutral-500">
+            <div className="text-xs text-faint">
               {aiPrompt.length.toLocaleString()}/200,000
             </div>
             <div className="flex gap-2">
@@ -571,8 +571,8 @@ export default function ProgramBuilderClient({
       )}
 
       {phases.length === 0 ? (
-        <div className="text-center py-20 bg-neutral-800 border border-neutral-700 rounded-xl">
-          <p className="text-neutral-400 mb-4">No phases yet</p>
+        <div className="text-center py-20 bg-surface border border-line rounded-xl">
+          <p className="text-mute mb-4">No phases yet</p>
           <Button onClick={handleAddPhase}>
             <Plus className="w-4 h-4 mr-2" />
             Add First Phase
@@ -587,8 +587,8 @@ export default function ProgramBuilderClient({
                 onClick={() => setActivePhaseId(phase.id)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${
                   activePhaseId === phase.id
-                    ? "bg-emerald-500 text-white"
-                    : "bg-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-700"
+                    ? "bg-emerald-500 text-ink"
+                    : "bg-surface text-mute hover:text-ink hover:bg-hover"
                 }`}
               >
                 {phase.name}
@@ -631,28 +631,28 @@ export default function ProgramBuilderClient({
 
       {exercisePicker && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-neutral-800 border border-neutral-700 rounded-xl w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-neutral-700">
+          <div className="bg-surface border border-line rounded-xl w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-line">
               <h2 className="text-lg font-semibold">Pick Exercise</h2>
               <button
                 onClick={() => {
                   setExercisePicker(null);
                   setExerciseSearch("");
                 }}
-                className="p-1.5 rounded-lg hover:bg-neutral-700 text-neutral-400 hover:text-white transition-colors"
+                className="p-1.5 rounded-lg hover:bg-hover text-mute hover:text-ink transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-4 border-b border-neutral-700">
+            <div className="p-4 border-b border-line">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-mute" />
                 <input
                   type="text"
                   value={exerciseSearch}
                   onChange={(e) => setExerciseSearch(e.target.value)}
                   placeholder="Search exercises..."
-                  className="w-full pl-10 pr-4 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full pl-10 pr-4 py-2 bg-bg border border-line rounded-lg text-ink placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>
@@ -661,10 +661,10 @@ export default function ProgramBuilderClient({
                 <button
                   key={exercise.id}
                   onClick={() => handleAddExercise(exercise.id)}
-                  className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-neutral-700 text-white transition-colors cursor-pointer"
+                  className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-hover text-ink transition-colors cursor-pointer"
                 >
                   <div className="font-medium text-sm">{exercise.name}</div>
-                  <div className="text-xs text-neutral-400 capitalize">
+                  <div className="text-xs text-mute capitalize">
                     {exercise.category} · {exercise.trackingType}
                   </div>
                 </button>
@@ -761,7 +761,7 @@ function ExerciseEditModal({
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-neutral-400 mb-1">
+            <label className="block text-xs font-medium text-mute mb-1">
               Sets
             </label>
             <input
@@ -769,11 +769,11 @@ function ExerciseEditModal({
               min={0}
               value={sets}
               onChange={(e) => setSets(e.target.value)}
-              className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 bg-bg border border-line rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-neutral-400 mb-1">
+            <label className="block text-xs font-medium text-mute mb-1">
               Reps
             </label>
             <input
@@ -781,11 +781,11 @@ function ExerciseEditModal({
               value={reps}
               onChange={(e) => setReps(e.target.value)}
               placeholder="5 or 3-5"
-              className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 bg-bg border border-line rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-neutral-400 mb-1">
+            <label className="block text-xs font-medium text-mute mb-1">
               Load
             </label>
             <input
@@ -793,11 +793,11 @@ function ExerciseEditModal({
               value={load}
               onChange={(e) => setLoad(e.target.value)}
               placeholder="80kg, BW, RPE 8"
-              className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 bg-bg border border-line rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-neutral-400 mb-1">
+            <label className="block text-xs font-medium text-mute mb-1">
               Rest (sec)
             </label>
             <input
@@ -805,11 +805,11 @@ function ExerciseEditModal({
               min={0}
               value={restSeconds}
               onChange={(e) => setRestSeconds(e.target.value)}
-              className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 bg-bg border border-line rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-neutral-400 mb-1">
+            <label className="block text-xs font-medium text-mute mb-1">
               Distance (m)
             </label>
             <input
@@ -818,11 +818,11 @@ function ExerciseEditModal({
               step="0.01"
               value={distance}
               onChange={(e) => setDistance(e.target.value)}
-              className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 bg-bg border border-line rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-neutral-400 mb-1">
+            <label className="block text-xs font-medium text-mute mb-1">
               Time (sec)
             </label>
             <input
@@ -831,11 +831,11 @@ function ExerciseEditModal({
               step="0.01"
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 bg-bg border border-line rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
           <div className="col-span-2">
-            <label className="block text-xs font-medium text-neutral-400 mb-1">
+            <label className="block text-xs font-medium text-mute mb-1">
               RPE Target (1–10)
             </label>
             <input
@@ -846,13 +846,13 @@ function ExerciseEditModal({
               value={rpeTarget}
               onChange={(e) => setRpeTarget(e.target.value)}
               placeholder="e.g. 8 for hard but 2 reps in reserve"
-              className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 bg-bg border border-line rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-neutral-400 mb-1 flex items-center gap-1.5">
+          <label className="block text-xs font-medium text-mute mb-1 flex items-center gap-1.5">
             <StickyNote className="w-3.5 h-3.5" />
             Notes
           </label>
@@ -861,7 +861,7 @@ function ExerciseEditModal({
             onChange={(e) => setNotes(e.target.value)}
             rows={4}
             placeholder="Coaching cues, intent, regressions..."
-            className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-y"
+            className="w-full px-3 py-2 bg-bg border border-line rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-y"
           />
         </div>
 
@@ -940,36 +940,36 @@ function PhaseView({
   };
 
   return (
-    <div className="bg-neutral-800 border border-neutral-700 rounded-xl">
-      <div className="p-4 border-b border-neutral-700 flex items-center justify-between">
+    <div className="bg-surface border border-line rounded-xl">
+      <div className="p-4 border-b border-line flex items-center justify-between">
         {editingPhase ? (
           <div className="flex-1 flex flex-wrap items-center gap-3">
             <input
               type="text"
               value={phaseName}
               onChange={(e) => setPhaseName(e.target.value)}
-              className="px-3 py-1.5 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="px-3 py-1.5 bg-bg border border-line rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
             <input
               type="text"
               value={phaseGoal}
               onChange={(e) => setPhaseGoal(e.target.value)}
               placeholder="Goal..."
-              className="px-3 py-1.5 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="px-3 py-1.5 bg-bg border border-line rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
-            <div className="flex items-center gap-1 text-sm text-neutral-400">
+            <div className="flex items-center gap-1 text-sm text-mute">
               <input
                 type="number"
                 value={phaseStart}
                 onChange={(e) => setPhaseStart(parseInt(e.target.value))}
-                className="w-14 px-2 py-1.5 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-14 px-2 py-1.5 bg-bg border border-line rounded-lg text-ink text-sm text-center focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
               <span>-</span>
               <input
                 type="number"
                 value={phaseEnd}
                 onChange={(e) => setPhaseEnd(parseInt(e.target.value))}
-                className="w-14 px-2 py-1.5 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-14 px-2 py-1.5 bg-bg border border-line rounded-lg text-ink text-sm text-center focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <Button size="sm" onClick={handleSavePhase}>
@@ -986,12 +986,12 @@ function PhaseView({
                 {phase.name}
                 <button
                   onClick={() => setEditingPhase(true)}
-                  className="p-1 rounded hover:bg-neutral-700 text-neutral-400 hover:text-white transition-colors"
+                  className="p-1 rounded hover:bg-hover text-mute hover:text-ink transition-colors"
                 >
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
               </h2>
-              <p className="text-sm text-neutral-400">
+              <p className="text-sm text-mute">
                 {phase.goal || "No goal set"} · Weeks {phase.startWeek}–
                 {phase.endWeek} ({weekCount} weeks)
               </p>
@@ -1008,14 +1008,14 @@ function PhaseView({
         )}
       </div>
 
-      <div className="px-4 py-3 border-b border-neutral-700 flex items-center gap-2 overflow-x-auto">
-        <span className="text-xs text-neutral-500 mr-1">View:</span>
+      <div className="px-4 py-3 border-b border-line flex items-center gap-2 overflow-x-auto">
+        <span className="text-xs text-faint mr-1">View:</span>
         <button
           onClick={() => onSelectWeek(0)}
           className={`px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
             activeWeek === 0
-              ? "bg-emerald-500 text-white"
-              : "bg-neutral-700 text-neutral-300 hover:text-white hover:bg-neutral-600"
+              ? "bg-emerald-500 text-ink"
+              : "bg-surface text-ink hover:text-ink hover:bg-hover"
           }`}
           title="Sessions that repeat across every week of this phase"
         >
@@ -1027,8 +1027,8 @@ function PhaseView({
             onClick={() => onSelectWeek(w)}
             className={`px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
               activeWeek === w
-                ? "bg-emerald-500 text-white"
-                : "bg-neutral-700 text-neutral-300 hover:text-white hover:bg-neutral-600"
+                ? "bg-emerald-500 text-ink"
+                : "bg-surface text-ink hover:text-ink hover:bg-hover"
             }`}
           >
             Week {w}
@@ -1037,7 +1037,7 @@ function PhaseView({
       </div>
 
       <div className="overflow-x-auto">
-        <div className="grid grid-cols-7 gap-px bg-neutral-700/50 min-w-[900px]">
+        <div className="grid grid-cols-7 gap-px bg-surface/50 min-w-[900px]">
           {DAY_NAMES.map((day, i) => {
             const dayNum = i + 1;
             const dayTemplates = phaseTemplates.filter(
@@ -1045,14 +1045,14 @@ function PhaseView({
             );
 
             return (
-              <div key={dayNum} className="bg-neutral-800 min-h-[200px]">
-                <div className="px-3 py-2 border-b border-neutral-700 flex items-center justify-between">
-                  <span className="text-sm font-medium text-neutral-300">
+              <div key={dayNum} className="bg-surface min-h-[200px]">
+                <div className="px-3 py-2 border-b border-line flex items-center justify-between">
+                  <span className="text-sm font-medium text-ink">
                     {day}
                   </span>
                   <button
                     onClick={() => onAddSession(phase.id, dayNum, activeWeek)}
-                    className="p-1 rounded hover:bg-neutral-700 text-neutral-500 hover:text-white transition-colors"
+                    className="p-1 rounded hover:bg-hover text-faint hover:text-ink transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
@@ -1066,15 +1066,15 @@ function PhaseView({
                     return (
                       <div
                         key={template.id}
-                        className="bg-neutral-900 border border-neutral-700 rounded-lg p-2"
+                        className="bg-bg border border-line rounded-lg p-2"
                       >
                         <div className="flex items-center justify-between mb-2 gap-1">
-                          <span className="text-xs font-medium text-white truncate flex items-center gap-1.5">
+                          <span className="text-xs font-medium text-ink truncate flex items-center gap-1.5">
                             {template.label}
                             <span
                               className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
                                 template.week === 0
-                                  ? "bg-neutral-700 text-neutral-300"
+                                  ? "bg-surface text-ink"
                                   : "bg-emerald-500/20 text-emerald-300"
                               }`}
                               title={
@@ -1088,7 +1088,7 @@ function PhaseView({
                           </span>
                           <button
                             onClick={() => onDeleteSession(template.id)}
-                            className="p-0.5 rounded hover:bg-neutral-700 text-neutral-500 hover:text-red-400 transition-colors"
+                            className="p-0.5 rounded hover:bg-hover text-faint hover:text-red-400 transition-colors"
                           >
                             <Trash2 className="w-3 h-3" />
                           </button>
@@ -1102,10 +1102,10 @@ function PhaseView({
                             return (
                               <div
                                 key={block.id}
-                                className={`border rounded-lg p-2 ${blockTypeColors[block.blockType] ?? "bg-neutral-700/30 border-neutral-600"}`}
+                                className={`border rounded-lg p-2 ${blockTypeColors[block.blockType] ?? "bg-surface/30 border-line"}`}
                               >
                                 <div className="flex items-center justify-between mb-1">
-                                  <span className="text-xs font-medium text-neutral-300 capitalize">
+                                  <span className="text-xs font-medium text-ink capitalize">
                                     {block.label ?? block.blockType}
                                   </span>
                                   <div className="flex items-center gap-0.5">
@@ -1113,13 +1113,13 @@ function PhaseView({
                                       onClick={() =>
                                         onOpenExercisePicker(block.id)
                                       }
-                                      className="p-0.5 rounded hover:bg-neutral-700 text-neutral-500 hover:text-white transition-colors"
+                                      className="p-0.5 rounded hover:bg-hover text-faint hover:text-ink transition-colors"
                                     >
                                       <Plus className="w-3 h-3" />
                                     </button>
                                     <button
                                       onClick={() => onDeleteBlock(block.id)}
-                                      className="p-0.5 rounded hover:bg-neutral-700 text-neutral-500 hover:text-red-400 transition-colors"
+                                      className="p-0.5 rounded hover:bg-hover text-faint hover:text-red-400 transition-colors"
                                     >
                                       <Trash2 className="w-3 h-3" />
                                     </button>
@@ -1133,14 +1133,14 @@ function PhaseView({
                                   >
                                     <button
                                       onClick={() => onEditExercise(be.id)}
-                                      className="flex-1 min-w-0 text-left text-xs text-neutral-200 truncate hover:text-white transition-colors cursor-pointer"
+                                      className="flex-1 min-w-0 text-left text-xs text-ink truncate hover:text-ink transition-colors cursor-pointer"
                                       title="Edit sets, reps, rest, notes"
                                     >
                                       <span className="truncate">
                                         {be.exerciseName ?? "Unknown"}
                                       </span>
                                       {(be.sets || be.reps) && (
-                                        <span className="text-neutral-500 ml-1">
+                                        <span className="text-faint ml-1">
                                           {be.sets ?? "?"}×{be.reps ?? "?"}
                                         </span>
                                       )}
@@ -1148,7 +1148,7 @@ function PhaseView({
                                     {be.notes && (
                                       <button
                                         onClick={() => onEditExercise(be.id)}
-                                        className="p-0.5 rounded text-amber-400 hover:bg-neutral-700 transition-colors"
+                                        className="p-0.5 rounded text-amber-400 hover:bg-hover transition-colors"
                                         title={be.notes}
                                       >
                                         <StickyNote className="w-3 h-3" />
@@ -1158,7 +1158,7 @@ function PhaseView({
                                       onClick={() =>
                                         onRemoveExercise(be.id)
                                       }
-                                      className="p-0.5 rounded opacity-0 group-hover:opacity-100 hover:bg-neutral-700 text-neutral-500 hover:text-red-400 transition-all"
+                                      className="p-0.5 rounded opacity-0 group-hover:opacity-100 hover:bg-hover text-faint hover:text-red-400 transition-all"
                                     >
                                       <X className="w-3 h-3" />
                                     </button>
@@ -1171,7 +1171,7 @@ function PhaseView({
                                       onClick={() =>
                                         onOpenExercisePicker(block.id)
                                       }
-                                      className="w-full text-center py-1 text-xs text-neutral-500 hover:text-neutral-300 transition-colors cursor-pointer"
+                                      className="w-full text-center py-1 text-xs text-faint hover:text-ink transition-colors cursor-pointer"
                                     >
                                       + Add exercise
                                     </button>
@@ -1181,19 +1181,19 @@ function PhaseView({
                           })}
 
                           {addingBlockTo === template.id ? (
-                            <div className="flex flex-wrap gap-1 p-1 bg-neutral-800 rounded-lg">
+                            <div className="flex flex-wrap gap-1 p-1 bg-surface rounded-lg">
                               {BLOCK_TYPES.map((bt) => (
                                 <button
                                   key={bt}
                                   onClick={() => onAddBlockType(template.id, bt)}
-                                  className="px-2 py-1 text-xs rounded bg-neutral-700 text-neutral-300 hover:text-white hover:bg-neutral-600 transition-colors cursor-pointer capitalize"
+                                  className="px-2 py-1 text-xs rounded bg-surface text-ink hover:text-ink hover:bg-hover transition-colors cursor-pointer capitalize"
                                 >
                                   {bt}
                                 </button>
                               ))}
                               <button
                                 onClick={onCancelAddBlock}
-                                className="px-2 py-1 text-xs rounded text-neutral-500 hover:text-white transition-colors cursor-pointer"
+                                className="px-2 py-1 text-xs rounded text-faint hover:text-ink transition-colors cursor-pointer"
                               >
                                 <X className="w-3 h-3" />
                               </button>
@@ -1201,7 +1201,7 @@ function PhaseView({
                           ) : (
                             <button
                               onClick={() => onAddBlock(template.id)}
-                              className="w-full text-center py-1.5 text-xs text-neutral-500 hover:text-neutral-300 rounded-lg border border-dashed border-neutral-700 hover:border-neutral-500 transition-colors cursor-pointer"
+                              className="w-full text-center py-1.5 text-xs text-faint hover:text-ink rounded-lg border border-dashed border-line hover:border-rule transition-colors cursor-pointer"
                             >
                               + Add block
                             </button>
@@ -1214,7 +1214,7 @@ function PhaseView({
                   {dayTemplates.length === 0 && (
                     <button
                       onClick={() => onAddSession(phase.id, dayNum, activeWeek)}
-                      className="w-full text-center py-3 text-xs text-neutral-600 hover:text-neutral-400 rounded-lg border border-dashed border-neutral-700/50 hover:border-neutral-600 transition-colors cursor-pointer"
+                      className="w-full text-center py-3 text-xs text-faint hover:text-mute rounded-lg border border-dashed border-line/50 hover:border-line transition-colors cursor-pointer"
                     >
                       + Session
                     </button>

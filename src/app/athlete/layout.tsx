@@ -16,7 +16,7 @@ export default async function AthleteLayout({
   const unreadMessages = userId ? await getUnreadMessageCount(userId) : 0;
 
   return (
-    <div className="min-h-screen bg-neutral-900 flex flex-col">
+    <div className="min-h-screen bg-bg flex flex-col">
       <Header />
       <main className="flex-1 pb-20">{children}</main>
       <AthleteNav unreadMessages={unreadMessages} />

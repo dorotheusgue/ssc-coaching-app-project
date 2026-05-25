@@ -17,7 +17,7 @@ export default async function ExercisesPage() {
     .all();
 
   return (
-    <div className="min-h-screen bg-neutral-900 text-white">
+    <div className="min-h-screen bg-bg text-ink">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <ExerciseLibraryClient
           exercises={allExercises}

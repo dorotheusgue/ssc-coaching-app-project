@@ -3,6 +3,7 @@
 import { signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { ThemeToggle } from "@/lib/theme/ThemeToggle";
 
 interface HeaderProps {
   user?: {
@@ -14,18 +15,19 @@ interface HeaderProps {
 
 function Header({ user }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-30 bg-neutral-900/80 backdrop-blur-md border-b border-neutral-800">
+    <header className="sticky top-0 z-30 bg-bg/80 backdrop-blur-md border-b border-rule">
       <div className="flex items-center justify-between px-4 sm:px-6 py-3">
-        <h1 className="text-lg font-bold text-emerald-500">SSC</h1>
-        <div className="flex items-center gap-4">
+        <h1 className="text-lg font-bold text-ink tracking-tight">SSC</h1>
+        <div className="flex items-center gap-3">
           {user && (
             <div className="hidden sm:flex flex-col items-end">
-              <span className="text-sm font-medium text-white">
+              <span className="text-sm font-medium text-ink">
                 {user.name}
               </span>
-              <span className="text-xs text-neutral-400">{user.email}</span>
+              <span className="text-xs text-mute">{user.email}</span>
             </div>
           )}
+          <ThemeToggle />
           <Button
             variant="ghost"
             size="sm"

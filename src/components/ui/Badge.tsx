@@ -13,7 +13,7 @@ const colorStyles: Record<BadgeColor, string> = {
   red: "bg-red-500/15 text-red-400 border-red-500/20",
   yellow: "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
   purple: "bg-purple-500/15 text-purple-400 border-purple-500/20",
-  neutral: "bg-neutral-500/15 text-neutral-400 border-neutral-500/20",
+  neutral: "bg-mute/15 text-mute border-mute/20",
 };
 
 function Badge({

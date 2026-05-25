@@ -21,7 +21,7 @@ function AthleteNav({ unreadMessages = 0 }: { unreadMessages?: number }) {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-neutral-900 border-t border-neutral-800 lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-bg border-t border-rule lg:hidden">
       <div className="flex items-center justify-around py-2">
         {navItems.map((item) => {
           const isActive =
@@ -36,16 +36,16 @@ function AthleteNav({ unreadMessages = 0 }: { unreadMessages?: number }) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                "flex flex-col items-center gap-1 px-3 py-1.5 text-xs font-medium transition-colors",
                 isActive
-                  ? "text-emerald-400"
-                  : "text-neutral-500 hover:text-neutral-300"
+                  ? "text-ink"
+                  : "text-faint hover:text-ink"
               )}
             >
               <span className="relative">
                 <item.icon className="h-5 w-5" />
                 {badge !== null && (
-                  <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                  <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 bg-ink text-bg text-[10px] font-bold flex items-center justify-center">
                     {badge > 9 ? "9+" : badge}
                   </span>
                 )}

@@ -61,8 +61,8 @@ export default async function AthletesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Athletes</h1>
-          <p className="text-neutral-400 mt-1">
+          <h1 className="text-2xl font-bold text-ink">Athletes</h1>
+          <p className="text-mute mt-1">
             {athletes.length} athlete{athletes.length !== 1 ? "s" : ""} in your
             roster
           </p>

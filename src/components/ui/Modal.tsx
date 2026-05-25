@@ -43,16 +43,16 @@ function Modal({ open, onClose, title, children, className }: ModalProps) {
     >
       <div
         className={cn(
-          "bg-neutral-800 border border-neutral-700 rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto",
+          "bg-surface border border-line rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto",
           className
         )}
       >
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-700">
-            <h2 className="text-lg font-semibold text-white">{title}</h2>
+          <div className="flex items-center justify-between px-6 py-4 border-b border-line">
+            <h2 className="text-lg font-semibold text-ink">{title}</h2>
             <button
               onClick={onClose}
-              className="text-neutral-400 hover:text-white transition-colors cursor-pointer"
+              className="text-mute hover:text-ink transition-colors cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>

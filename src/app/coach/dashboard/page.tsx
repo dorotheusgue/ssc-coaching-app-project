@@ -153,8 +153,8 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          <p className="text-neutral-400 mt-1">
+          <h1 className="text-2xl font-bold text-ink">Dashboard</h1>
+          <p className="text-mute mt-1">
             Welcome back, {session!.user?.name}
           </p>
         </div>
@@ -176,12 +176,12 @@ export default async function DashboardPage() {
             <Card key={kpi.label}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-neutral-400">{kpi.label}</p>
-                  <p className="text-3xl font-bold text-white mt-1">
+                  <p className="text-sm text-mute">{kpi.label}</p>
+                  <p className="text-3xl font-bold text-ink mt-1">
                     {kpi.value}
                   </p>
                 </div>
-                <div className={`p-3 rounded-lg bg-neutral-700/50 ${kpi.color}`}>
+                <div className={`p-3 rounded-lg bg-surface/50 ${kpi.color}`}>
                   <Icon className="w-6 h-6" />
                 </div>
               </div>
@@ -209,24 +209,24 @@ export default async function DashboardPage() {
           <div className="space-y-3">
             <NewProgramQuickAction />
             <Link href="/coach/athletes" className="block">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-neutral-700/50 hover:bg-neutral-700 transition-colors">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-surface/50 hover:bg-hover transition-colors">
                 <div className="p-2 rounded-md bg-blue-500/10">
                   <Users className="w-4 h-4 text-blue-500" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-white">Add Athlete</p>
-                  <p className="text-xs text-neutral-400">Invite a new athlete</p>
+                  <p className="text-sm font-medium text-ink">Add Athlete</p>
+                  <p className="text-xs text-mute">Invite a new athlete</p>
                 </div>
               </div>
             </Link>
             <Link href="/coach/calendar" className="block">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-neutral-700/50 hover:bg-neutral-700 transition-colors">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-surface/50 hover:bg-hover transition-colors">
                 <div className="p-2 rounded-md bg-purple-500/10">
                   <CalendarDays className="w-4 h-4 text-purple-500" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-white">View Calendar</p>
-                  <p className="text-xs text-neutral-400">See upcoming sessions</p>
+                  <p className="text-sm font-medium text-ink">View Calendar</p>
+                  <p className="text-xs text-mute">See upcoming sessions</p>
                 </div>
               </div>
             </Link>
@@ -236,22 +236,22 @@ export default async function DashboardPage() {
 
       <Card title="Recent Activity">
         {recentSessions.length === 0 ? (
-          <p className="text-neutral-400 text-sm">No completed sessions yet.</p>
+          <p className="text-mute text-sm">No completed sessions yet.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-neutral-700">
-                  <th className="text-left py-3 px-4 text-neutral-400 font-medium">
+                <tr className="border-b border-line">
+                  <th className="text-left py-3 px-4 text-mute font-medium">
                     Athlete
                   </th>
-                  <th className="text-left py-3 px-4 text-neutral-400 font-medium">
+                  <th className="text-left py-3 px-4 text-mute font-medium">
                     Session
                   </th>
-                  <th className="text-left py-3 px-4 text-neutral-400 font-medium">
+                  <th className="text-left py-3 px-4 text-mute font-medium">
                     Date
                   </th>
-                  <th className="text-left py-3 px-4 text-neutral-400 font-medium">
+                  <th className="text-left py-3 px-4 text-mute font-medium">
                     Completed
                   </th>
                 </tr>
@@ -260,12 +260,12 @@ export default async function DashboardPage() {
                 {recentSessions.map((s) => (
                   <tr
                     key={s.id}
-                    className="border-b border-neutral-700/50 hover:bg-neutral-700/30"
+                    className="border-b border-line/50 hover:bg-hover/30"
                   >
-                    <td className="py-3 px-4 text-white">{s.athleteName}</td>
-                    <td className="py-3 px-4 text-neutral-300">{s.label}</td>
-                    <td className="py-3 px-4 text-neutral-300">{s.date}</td>
-                    <td className="py-3 px-4 text-neutral-300">
+                    <td className="py-3 px-4 text-ink">{s.athleteName}</td>
+                    <td className="py-3 px-4 text-ink">{s.label}</td>
+                    <td className="py-3 px-4 text-ink">{s.date}</td>
+                    <td className="py-3 px-4 text-ink">
                       {s.completedAt
                         ? new Date(s.completedAt).toLocaleString()
                         : "—"}
@@ -309,14 +309,14 @@ function NewProgramQuickAction() {
     <form action={createNewProgram}>
       <button
         type="submit"
-        className="w-full flex items-center gap-3 p-3 rounded-lg bg-neutral-700/50 hover:bg-neutral-700 transition-colors text-left"
+        className="w-full flex items-center gap-3 p-3 rounded-lg bg-surface/50 hover:bg-hover transition-colors text-left"
       >
         <div className="p-2 rounded-md bg-emerald-500/10">
           <Dumbbell className="w-4 h-4 text-emerald-500" />
         </div>
         <div>
-          <p className="text-sm font-medium text-white">New Program</p>
-          <p className="text-xs text-neutral-400">Create a training program</p>
+          <p className="text-sm font-medium text-ink">New Program</p>
+          <p className="text-xs text-mute">Create a training program</p>
         </div>
       </button>
     </form>

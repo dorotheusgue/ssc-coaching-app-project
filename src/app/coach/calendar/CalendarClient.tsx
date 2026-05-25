@@ -105,8 +105,8 @@ export default function CalendarClient({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Calendar</h1>
-          <p className="text-neutral-400 text-sm mt-1">
+          <h1 className="text-2xl font-bold text-ink">Calendar</h1>
+          <p className="text-mute text-sm mt-1">
             Schedule and assign training programs
           </p>
         </div>
@@ -119,27 +119,27 @@ export default function CalendarClient({
       <div className="flex items-center justify-between">
         <a
           href={`/coach/calendar?month=${prevMonth.month}&year=${prevMonth.year}`}
-          className="p-2 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
+          className="p-2 rounded-lg hover:bg-hover text-mute hover:text-ink transition-colors"
         >
           <ChevronLeft className="w-5 h-5" />
         </a>
-        <h2 className="text-xl font-semibold text-white">
+        <h2 className="text-xl font-semibold text-ink">
           {format(currentMonth, "MMMM yyyy")}
         </h2>
         <a
           href={`/coach/calendar?month=${nextMonth.month}&year=${nextMonth.year}`}
-          className="p-2 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
+          className="p-2 rounded-lg hover:bg-hover text-mute hover:text-ink transition-colors"
         >
           <ChevronRight className="w-5 h-5" />
         </a>
       </div>
 
-      <div className="bg-neutral-800 rounded-xl border border-neutral-700 overflow-hidden">
-        <div className="grid grid-cols-7 border-b border-neutral-700">
+      <div className="bg-surface rounded-xl border border-line overflow-hidden">
+        <div className="grid grid-cols-7 border-b border-line">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
             <div
               key={d}
-              className="p-3 text-center text-sm font-medium text-neutral-400 border-r border-neutral-700 last:border-r-0"
+              className="p-3 text-center text-sm font-medium text-mute border-r border-line last:border-r-0"
             >
               {d}
             </div>
@@ -149,7 +149,7 @@ export default function CalendarClient({
           {Array.from({ length: startDow }).map((_, i) => (
             <div
               key={`empty-${i}`}
-              className="min-h-28 p-2 border-r border-b border-neutral-700 bg-neutral-850"
+              className="min-h-28 p-2 border-r border-b border-line bg-surface"
             />
           ))}
           {days.map((day) => {
@@ -160,13 +160,13 @@ export default function CalendarClient({
               <div
                 key={dateStr}
                 onClick={() => setSelectedDay(dateStr)}
-                className={`min-h-28 p-2 border-r border-b border-neutral-700 cursor-pointer hover:bg-neutral-750 transition-colors ${
-                  today ? "bg-neutral-750 ring-1 ring-emerald-500/30" : ""
-                } ${selectedDay === dateStr ? "bg-neutral-700" : ""}`}
+                className={`min-h-28 p-2 border-r border-b border-line cursor-pointer hover:bg-hover transition-colors ${
+                  today ? "bg-surface ring-1 ring-emerald-500/30" : ""
+                } ${selectedDay === dateStr ? "bg-surface" : ""}`}
               >
                 <div
                   className={`text-sm font-medium mb-1 ${
-                    today ? "text-emerald-400" : "text-neutral-300"
+                    today ? "text-emerald-400" : "text-ink"
                   }`}
                 >
                   {format(day, "d")}
@@ -180,14 +180,14 @@ export default function CalendarClient({
                           ? "bg-emerald-500/20 text-emerald-400"
                           : s.status === "in_progress"
                             ? "bg-yellow-500/20 text-yellow-400"
-                            : "bg-neutral-700 text-neutral-300"
+                            : "bg-surface text-ink"
                       }`}
                     >
                       {s.athleteName.split(" ")[0]}: {s.label}
                     </div>
                   ))}
                   {daySessions.length > 3 && (
-                    <div className="text-xs text-neutral-500">
+                    <div className="text-xs text-faint">
                       +{daySessions.length - 3} more
                     </div>
                   )}
@@ -199,14 +199,14 @@ export default function CalendarClient({
       </div>
 
       {selectedDay && daySessions.length > 0 && (
-        <div className="bg-neutral-800 rounded-xl border border-neutral-700 p-6">
+        <div className="bg-surface rounded-xl border border-line p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-lg font-semibold text-ink">
               Sessions on {format(new Date(selectedDay + "T12:00:00"), "MMMM d, yyyy")}
             </h3>
             <button
               onClick={() => setSelectedDay(null)}
-              className="text-neutral-400 hover:text-white"
+              className="text-mute hover:text-ink"
             >
               <X className="w-5 h-5" />
             </button>
@@ -215,11 +215,11 @@ export default function CalendarClient({
             {daySessions.map((s) => (
               <div
                 key={s.id}
-                className="flex items-center justify-between p-3 bg-neutral-750 rounded-lg"
+                className="flex items-center justify-between p-3 bg-surface rounded-lg"
               >
                 <div>
-                  <div className="text-white font-medium">{s.athleteName}</div>
-                  <div className="text-neutral-400 text-sm">{s.label}</div>
+                  <div className="text-ink font-medium">{s.athleteName}</div>
+                  <div className="text-mute text-sm">{s.label}</div>
                 </div>
                 <Badge color={statusColor(s.status) as "emerald" | "yellow" | "red" | "neutral"}>
                   {s.status}
@@ -230,22 +230,22 @@ export default function CalendarClient({
         </div>
       )}
 
-      <div className="bg-neutral-800 rounded-xl border border-neutral-700 p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">
+      <div className="bg-surface rounded-xl border border-line p-6">
+        <h3 className="text-lg font-semibold text-ink mb-4">
           Recent Assignments
         </h3>
         <div className="space-y-2">
           {assignments.length === 0 ? (
-            <p className="text-neutral-400 text-sm">No assignments yet.</p>
+            <p className="text-mute text-sm">No assignments yet.</p>
           ) : (
             assignments.map((a) => (
               <div
                 key={a.id}
-                className="flex items-center justify-between p-3 bg-neutral-750 rounded-lg"
+                className="flex items-center justify-between p-3 bg-surface rounded-lg"
               >
                 <div>
-                  <div className="text-white font-medium">{a.programName}</div>
-                  <div className="text-neutral-400 text-sm">
+                  <div className="text-ink font-medium">{a.programName}</div>
+                  <div className="text-mute text-sm">
                     {a.athleteName} &middot; Started {a.startDate}
                   </div>
                 </div>
@@ -274,13 +274,13 @@ export default function CalendarClient({
             </div>
           )}
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">
+            <label className="block text-sm font-medium text-ink mb-1">
               Athlete
             </label>
             <select
               name="athleteId"
               required
-              className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               <option value="">Select athlete...</option>
               {athletes.map((a) => (
@@ -291,13 +291,13 @@ export default function CalendarClient({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">
+            <label className="block text-sm font-medium text-ink mb-1">
               Program
             </label>
             <select
               name="programId"
               required
-              className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               <option value="">Select program...</option>
               {programs.map((p) => (
@@ -308,14 +308,14 @@ export default function CalendarClient({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">
+            <label className="block text-sm font-medium text-ink mb-1">
               Start Date
             </label>
             <input
               type="date"
               name="startDate"
               required
-              className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
           <div className="flex gap-3 justify-end pt-2">

@@ -129,7 +129,7 @@ export default async function AthleteDetailPage({
     <div className="space-y-6">
       <Link
         href="/coach/athletes"
-        className="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors"
+        className="inline-flex items-center gap-2 text-sm text-mute hover:text-ink transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to Athletes
@@ -142,7 +142,7 @@ export default async function AthleteDetailPage({
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-white">{athlete.name}</h1>
+              <h1 className="text-2xl font-bold text-ink">{athlete.name}</h1>
               <EditProfileButton
                 profile={{
                   userId: athlete.id,
@@ -155,36 +155,36 @@ export default async function AthleteDetailPage({
                 }}
               />
             </div>
-            <p className="text-neutral-400 mt-1">{athlete.email}</p>
+            <p className="text-mute mt-1">{athlete.email}</p>
             <div className="flex flex-wrap gap-4 mt-4">
               {athlete.sport && (
-                <div className="flex items-center gap-2 text-sm text-neutral-300">
-                  <span className="text-neutral-500">Sport:</span>
-                  <span className="text-white font-medium">{athlete.sport}</span>
+                <div className="flex items-center gap-2 text-sm text-ink">
+                  <span className="text-faint">Sport:</span>
+                  <span className="text-ink font-medium">{athlete.sport}</span>
                 </div>
               )}
               {athlete.event && (
-                <div className="flex items-center gap-2 text-sm text-neutral-300">
-                  <span className="text-neutral-500">Event:</span>
-                  <span className="text-white font-medium">{athlete.event}</span>
+                <div className="flex items-center gap-2 text-sm text-ink">
+                  <span className="text-faint">Event:</span>
+                  <span className="text-ink font-medium">{athlete.event}</span>
                 </div>
               )}
               {athlete.height && (
-                <div className="flex items-center gap-2 text-sm text-neutral-300">
-                  <span className="text-neutral-500">Height:</span>
-                  <span className="text-white font-medium">{athlete.height} cm</span>
+                <div className="flex items-center gap-2 text-sm text-ink">
+                  <span className="text-faint">Height:</span>
+                  <span className="text-ink font-medium">{athlete.height} cm</span>
                 </div>
               )}
               {athlete.weight && (
-                <div className="flex items-center gap-2 text-sm text-neutral-300">
-                  <span className="text-neutral-500">Weight:</span>
-                  <span className="text-white font-medium">{athlete.weight} kg</span>
+                <div className="flex items-center gap-2 text-sm text-ink">
+                  <span className="text-faint">Weight:</span>
+                  <span className="text-ink font-medium">{athlete.weight} kg</span>
                 </div>
               )}
             </div>
             {Object.keys(personalBests).length > 0 && (
               <div className="mt-4">
-                <div className="flex items-center gap-2 text-sm text-neutral-400 mb-2">
+                <div className="flex items-center gap-2 text-sm text-mute mb-2">
                   <Trophy className="w-4 h-4 text-amber-500" />
                   Personal Bests
                 </div>
