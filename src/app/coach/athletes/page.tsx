@@ -28,6 +28,12 @@ export default async function AthletesPage() {
  .where(eq(athleteProfiles.coachId, coachId))
  .orderBy(users.name);
 
+ const coachPrograms = await db
+ .select({ id: programs.id, name: programs.name })
+ .from(programs)
+ .where(eq(programs.coachId, coachId))
+ .orderBy(programs.name);
+
  const athletesWithMeta = await Promise.all(
  athletes.map(async (a) => {
  const [assignment] = await db
@@ -70,7 +76,7 @@ export default async function AthletesPage() {
  <InviteAthleteButton coachId={coachId} />
  </div>
 
- <AthleteSearch athletes={athletesWithMeta} />
+ <AthleteSearch athletes={athletesWithMeta} programs={coachPrograms} />
  </div>
  );
 }

@@ -97,6 +97,88 @@ export async function assignProgramAction(formData: FormData) {
  return { success: true };
 }
 
+export async function assignProgramToManyAction(formData: FormData) {
+ const session = await auth();
+ if (!session?.user) return { error: "Unauthorized" };
+ const coachId = parseInt((session.user as { id?: string }).id ?? "0");
+
+ const programId = parseInt(formData.get("programId") as string);
+ const athleteIdsRaw = formData.get("athleteIds") as string;
+ const startDateStr = formData.get("startDate") as string;
+ const athleteIds = athleteIdsRaw
+ .split(",")
+ .map((s) => parseInt(s.trim()))
+ .filter((n) => Number.isFinite(n) && n > 0);
+
+ if (!programId || athleteIds.length === 0 || !startDateStr) {
+ return { error: "Missing required fields" };
+ }
+
+ const programPhases = await db
+ .select()
+ .from(phases)
+ .where(eq(phases.programId, programId))
+ .orderBy(phases.sortOrder);
+
+ const minStartWeek = programPhases.length
+ ? Math.min(...programPhases.map((p) => Math.max(1, p.startWeek)))
+ : 1;
+
+ const startDate = parseISO(startDateStr);
+
+ for (const athleteId of athleteIds) {
+ const [assignment] = await db
+ .insert(programAssignments)
+ .values({
+ programId,
+ athleteId,
+ coachId,
+ startDate: startDateStr,
+ })
+ .returning();
+
+ for (const phase of programPhases) {
+ const templates = await db
+ .select()
+ .from(sessionTemplates)
+ .where(eq(sessionTemplates.phaseId, phase.id))
+ .orderBy(sessionTemplates.sortOrder);
+
+ const startWeek = Math.max(1, phase.startWeek);
+ const endWeek = Math.max(startWeek, phase.endWeek);
+
+ for (const template of templates) {
+ const dayInWeek = Math.min(7, Math.max(1, template.dayOfWeek));
+ const weeksForTemplate =
+ template.week === 0
+ ? Array.from(
+ { length: endWeek - startWeek + 1 },
+ (_, i) => startWeek + i
+ )
+ : [startWeek + template.week - 1].filter((w) => w <= endWeek);
+
+ for (const week of weeksForTemplate) {
+ const offsetDays = (week - minStartWeek) * 7 + (dayInWeek - 1);
+ const sessionDate = addDays(startDate, offsetDays);
+
+ await db.insert(assignedSessions).values({
+ assignmentId: assignment.id,
+ athleteId,
+ sessionTemplateId: template.id,
+ date: format(sessionDate, "yyyy-MM-dd"),
+ label: template.label,
+ status: "scheduled",
+ });
+ }
+ }
+ }
+ }
+
+ revalidatePath("/coach/calendar");
+ revalidatePath("/coach/athletes");
+ return { success: true, count: athleteIds.length };
+}
+
 export async function rescheduleSessionAction(
  assignedSessionId: number,
  newDate: string
