@@ -25,6 +25,7 @@ interface Session {
  date: string;
  status: "completed" | "scheduled" | "skipped" | "in_progress";
  completedAt: Date | null;
+ notes: string | null;
 }
 
 interface ReadinessEntry {
@@ -301,6 +302,9 @@ export function AthleteDetailClient({
  <th className="text-left py-3 px-4 text-mute font-medium">
  Completed
  </th>
+ <th className="text-left py-3 px-4 text-mute font-medium">
+ Notes
+ </th>
  <th />
  </tr>
  </thead>
@@ -344,6 +348,15 @@ export function AthleteDetailClient({
  {s.completedAt
  ? new Date(s.completedAt).toLocaleString()
  : "—"}
+ </td>
+ <td className="py-3 px-4 text-mute max-w-xs">
+ {s.notes ? (
+ <span className="line-clamp-2 whitespace-pre-wrap" title={s.notes}>
+ {s.notes}
+ </span>
+ ) : (
+ "—"
+ )}
  </td>
  <td className="py-3 px-4 text-right">
  <button

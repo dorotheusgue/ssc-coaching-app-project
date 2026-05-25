@@ -67,6 +67,21 @@ export default function CalendarClient({
  );
  const [assignLoading, setAssignLoading] = useState(false);
  const [assignError, setAssignError] = useState("");
+ const [colorBy, setColorBy] = useState<"status" | "athlete">("status");
+
+ // Stable monochrome tints, hashed off athleteId.
+ const ATHLETE_TINTS = [
+ "bg-ink/10 text-ink",
+ "bg-ink/20 text-ink",
+ "bg-ink/30 text-ink",
+ "bg-ink/40 text-ink",
+ "bg-ink/55 text-bg",
+ "bg-ink/70 text-bg",
+ "bg-ink/85 text-bg",
+ ];
+ function tintForAthlete(id: number) {
+ return ATHLETE_TINTS[Math.abs(id) % ATHLETE_TINTS.length];
+ }
 
  const monthStart = startOfMonth(currentMonth);
  const monthEnd = endOfMonth(currentMonth);
@@ -173,10 +188,28 @@ export default function CalendarClient({
  Schedule and assign training programs
  </p>
  </div>
+ <div className="flex items-center gap-2">
+ <div className="flex border border-line bg-surface">
+ {(["status", "athlete"] as const).map((m) => (
+ <button
+ key={m}
+ onClick={() => setColorBy(m)}
+ className={`px-2.5 h-9 text-xs capitalize cursor-pointer transition-colors ${
+ colorBy === m
+ ? "bg-ink text-bg"
+ : "text-mute hover:text-ink"
+ }`}
+ title={`Color sessions by ${m}`}
+ >
+ {m}
+ </button>
+ ))}
+ </div>
  <Button onClick={() => setShowAssign(true)}>
  <Plus className="w-4 h-4 mr-2" />
  Assign Program
  </Button>
+ </div>
  </div>
 
  <div className="flex items-center justify-between">
@@ -238,20 +271,24 @@ export default function CalendarClient({
  {format(day, "d")}
  </div>
  <div className="space-y-1">
- {daySessions.slice(0, 3).map((s) => (
+ {daySessions.slice(0, 3).map((s) => {
+ const tint =
+ colorBy === "athlete"
+ ? tintForAthlete(s.athleteId)
+ : s.status === "completed"
+ ? "bg-ink/30 text-ink"
+ : s.status === "in_progress"
+ ? "bg-ink/15 text-ink"
+ : "bg-surface text-ink";
+ return (
  <div
  key={s.id}
- className={`text-xs px-1.5 py-0.5 truncate ${
- s.status === "completed"
- ? "bg-ink/20 text-ink"
- : s.status === "in_progress"
- ? "bg-ink/20 text-ink"
- : "bg-surface text-ink"
- }`}
+ className={`text-xs px-1.5 py-0.5 truncate ${tint}`}
  >
  {s.athleteName.split(" ")[0]}: {s.label}
  </div>
- ))}
+ );
+ })}
  {daySessions.length > 3 && (
  <div className="text-xs text-faint">
  +{daySessions.length - 3} more

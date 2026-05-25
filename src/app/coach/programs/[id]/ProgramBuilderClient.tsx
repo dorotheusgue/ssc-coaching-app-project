@@ -13,8 +13,11 @@ import {
  Save,
  Sparkles,
  Upload,
+ Play,
+ Dumbbell,
 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
+import { getVideoThumbnail } from "@/lib/videoThumb";
 import {
  createPhase,
  updatePhase,
@@ -657,18 +660,37 @@ export default function ProgramBuilderClient({
  </div>
  </div>
  <div className="overflow-y-auto flex-1 p-2">
- {filteredExercises.map((exercise) => (
+ {filteredExercises.map((exercise) => {
+ const thumb = getVideoThumbnail(exercise.videoUrl);
+ return (
  <button
  key={exercise.id}
  onClick={() => handleAddExercise(exercise.id)}
- className="w-full text-left px-3 py-2.5 hover:bg-hover text-ink transition-colors cursor-pointer"
+ className="w-full text-left px-3 py-2.5 hover:bg-hover text-ink transition-colors cursor-pointer flex items-center gap-3"
  >
- <div className="font-medium text-sm">{exercise.name}</div>
+ <div className="w-14 h-10 shrink-0 bg-bg border border-line flex items-center justify-center overflow-hidden">
+ {thumb ? (
+ // eslint-disable-next-line @next/next/no-img-element
+ <img
+ src={thumb}
+ alt=""
+ className="w-full h-full object-cover"
+ />
+ ) : exercise.videoUrl ? (
+ <Play className="w-4 h-4 text-mute" />
+ ) : (
+ <Dumbbell className="w-4 h-4 text-faint" />
+ )}
+ </div>
+ <div className="min-w-0 flex-1">
+ <div className="font-medium text-sm truncate">{exercise.name}</div>
  <div className="text-xs text-mute capitalize">
  {exercise.category} · {exercise.trackingType}
  </div>
+ </div>
  </button>
- ))}
+ );
+ })}
  </div>
  </div>
  </div>

@@ -55,6 +55,115 @@ export async function updateProgram(
  return program;
 }
 
+export async function duplicateProgram(id: number) {
+ const session = await auth();
+ if (!session?.user) throw new Error("Unauthorized");
+ const coachId = parseInt((session.user as { id: string }).id);
+
+ const source = await db
+ .select()
+ .from(programs)
+ .where(and(eq(programs.id, id), eq(programs.coachId, coachId)))
+ .get();
+ if (!source) throw new Error("Program not found");
+
+ const [copy] = await db
+ .insert(programs)
+ .values({
+ coachId,
+ name: `${source.name} (copy)`,
+ description: source.description,
+ status: "draft",
+ })
+ .returning();
+
+ const sourcePhases = await db
+ .select()
+ .from(phases)
+ .where(eq(phases.programId, source.id))
+ .orderBy(phases.sortOrder);
+
+ for (const phase of sourcePhases) {
+ const [newPhase] = await db
+ .insert(phases)
+ .values({
+ programId: copy.id,
+ name: phase.name,
+ goal: phase.goal,
+ startWeek: phase.startWeek,
+ endWeek: phase.endWeek,
+ sortOrder: phase.sortOrder,
+ })
+ .returning();
+
+ const templates = await db
+ .select()
+ .from(sessionTemplates)
+ .where(eq(sessionTemplates.phaseId, phase.id))
+ .orderBy(sessionTemplates.sortOrder);
+
+ for (const t of templates) {
+ const [newTemplate] = await db
+ .insert(sessionTemplates)
+ .values({
+ phaseId: newPhase.id,
+ week: t.week,
+ dayOfWeek: t.dayOfWeek,
+ label: t.label,
+ notes: t.notes,
+ sortOrder: t.sortOrder,
+ })
+ .returning();
+
+ const blocks = await db
+ .select()
+ .from(sessionBlocks)
+ .where(eq(sessionBlocks.sessionTemplateId, t.id))
+ .orderBy(sessionBlocks.sortOrder);
+
+ for (const b of blocks) {
+ const [newBlock] = await db
+ .insert(sessionBlocks)
+ .values({
+ sessionTemplateId: newTemplate.id,
+ blockType: b.blockType,
+ label: b.label,
+ sortOrder: b.sortOrder,
+ })
+ .returning();
+
+ const exs = await db
+ .select()
+ .from(blockExercises)
+ .where(eq(blockExercises.blockId, b.id))
+ .orderBy(blockExercises.sortOrder);
+
+ if (exs.length > 0) {
+ await db.insert(blockExercises).values(
+ exs.map((e) => ({
+ blockId: newBlock.id,
+ exerciseId: e.exerciseId,
+ sets: e.sets,
+ reps: e.reps,
+ load: e.load,
+ percent1RM: e.percent1RM,
+ distance: e.distance,
+ time: e.time,
+ restSeconds: e.restSeconds,
+ rpeTarget: e.rpeTarget,
+ notes: e.notes,
+ sortOrder: e.sortOrder,
+ }))
+ );
+ }
+ }
+ }
+ }
+
+ revalidatePath("/coach/programs");
+ return copy;
+}
+
 export async function deleteProgram(id: number) {
  const session = await auth();
  if (!session?.user) throw new Error("Unauthorized");

@@ -90,6 +90,7 @@ export default async function AthleteDetailPage({
  date: assignedSessions.date,
  status: assignedSessions.status,
  completedAt: assignedSessions.completedAt,
+ notes: assignedSessions.notes,
  })
  .from(assignedSessions)
  .where(eq(assignedSessions.athleteId, athleteId))
@@ -118,6 +119,7 @@ export default async function AthleteDetailPage({
  date: assignedSessions.date,
  status: assignedSessions.status,
  completedAt: assignedSessions.completedAt,
+ notes: assignedSessions.notes,
  })
  .from(assignedSessions)
  .where(eq(assignedSessions.athleteId, athleteId))

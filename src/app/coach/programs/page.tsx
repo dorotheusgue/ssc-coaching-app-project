@@ -6,6 +6,7 @@ import { eq, count } from "drizzle-orm";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Plus, FileText } from "lucide-react";
+import { DuplicateProgramButton } from "./DuplicateProgramButton";
 
 export default async function ProgramsPage() {
  const session = await auth();
@@ -55,10 +56,16 @@ export default async function ProgramsPage() {
  ) : (
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
  {allPrograms.map((program) => (
- <Link
+ <div
  key={program.id}
+ className="relative bg-surface border border-line hover:border-rule transition-colors group"
+ >
+ <div className="absolute top-3 right-3 z-10">
+ <DuplicateProgramButton programId={program.id} />
+ </div>
+ <Link
  href={`/coach/programs/${program.id}`}
- className="bg-surface border border-line p-5 hover:border-line transition-colors group"
+ className="block p-5"
  >
  <div className="flex items-start justify-between mb-3">
  <span
@@ -87,6 +94,7 @@ export default async function ProgramsPage() {
  </span>
  </div>
  </Link>
+ </div>
  ))}
  </div>
  )}

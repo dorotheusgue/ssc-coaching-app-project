@@ -13,7 +13,9 @@ import {
  Ruler,
  Repeat,
  Footprints,
+ Play,
 } from "lucide-react";
+import { getVideoThumbnail } from "@/lib/videoThumb";
 
 type Exercise = {
  id: number;
@@ -224,11 +226,38 @@ export default function ExerciseLibraryClient({
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
  {filtered.map((exercise) => {
  const tags = Array.isArray(exercise.tags) ? (exercise.tags as string[]) : [];
+ const thumb = getVideoThumbnail(exercise.videoUrl);
  return (
  <div
  key={exercise.id}
- className="bg-surface border border-line p-5 hover:border-line transition-colors group"
+ className="bg-surface border border-line hover:border-rule transition-colors group overflow-hidden"
  >
+ {(thumb || exercise.videoUrl) && (
+ <a
+ href={exercise.videoUrl ?? undefined}
+ target="_blank"
+ rel="noreferrer"
+ className="block relative aspect-video bg-bg border-b border-line overflow-hidden"
+ >
+ {thumb ? (
+ // eslint-disable-next-line @next/next/no-img-element
+ <img
+ src={thumb}
+ alt={exercise.name}
+ className="w-full h-full object-cover"
+ />
+ ) : (
+ <div className="w-full h-full flex items-center justify-center bg-ink/5">
+ <Play className="w-8 h-8 text-mute" />
+ </div>
+ )}
+ <span className="absolute bottom-1 right-1 bg-ink/70 text-bg text-[10px] px-1.5 py-0.5 inline-flex items-center gap-1">
+ <Play className="w-3 h-3" />
+ video
+ </span>
+ </a>
+ )}
+ <div className="p-5">
  <div className="flex items-start justify-between mb-3">
  <div className="flex flex-wrap items-center gap-1.5">
  <span
@@ -288,6 +317,7 @@ export default function ExerciseLibraryClient({
  <div className="flex items-center gap-1 text-faint">
  {trackingIcons[exercise.trackingType]}
  <span className="text-xs capitalize">{exercise.trackingType}</span>
+ </div>
  </div>
  </div>
  </div>
