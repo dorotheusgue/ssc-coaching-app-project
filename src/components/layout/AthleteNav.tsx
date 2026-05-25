@@ -17,7 +17,7 @@ const navItems = [
   { label: "Media", href: "/athlete/media", icon: Video },
 ];
 
-function AthleteNav() {
+function AthleteNav({ unreadMessages = 0 }: { unreadMessages?: number }) {
   const pathname = usePathname();
 
   return (
@@ -27,6 +27,10 @@ function AthleteNav() {
           const isActive =
             pathname === item.href ||
             (item.href !== "/athlete" && pathname.startsWith(item.href));
+          const badge =
+            item.href === "/athlete/messages" && unreadMessages > 0
+              ? unreadMessages
+              : null;
           return (
             <Link
               key={item.href}
@@ -38,7 +42,14 @@ function AthleteNav() {
                   : "text-neutral-500 hover:text-neutral-300"
               )}
             >
-              <item.icon className="h-5 w-5" />
+              <span className="relative">
+                <item.icon className="h-5 w-5" />
+                {badge !== null && (
+                  <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                    {badge > 9 ? "9+" : badge}
+                  </span>
+                )}
+              </span>
               {item.label}
             </Link>
           );

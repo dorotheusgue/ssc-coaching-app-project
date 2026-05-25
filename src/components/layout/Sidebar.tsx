@@ -25,7 +25,11 @@ const navItems = [
   { href: "/coach/messages", label: "Messages", icon: MessageSquare },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({
+  unreadMessages = 0,
+}: {
+  unreadMessages?: number;
+}) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -44,6 +48,10 @@ export default function Sidebar() {
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
+          const badge =
+            item.href === "/coach/messages" && unreadMessages > 0
+              ? unreadMessages
+              : null;
           return (
             <Link
               key={item.href}
@@ -56,7 +64,12 @@ export default function Sidebar() {
               }`}
             >
               <Icon className="w-5 h-5" />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {badge !== null && (
+                <span className="min-w-[20px] h-[20px] px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                  {badge > 9 ? "9+" : badge}
+                </span>
+              )}
             </Link>
           );
         })}

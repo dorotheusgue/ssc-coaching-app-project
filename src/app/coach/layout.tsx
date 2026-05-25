@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import Sidebar from "@/components/layout/Sidebar";
+import { getUnreadMessageCount } from "@/lib/session";
 
 export default async function CoachLayout({
   children,
@@ -18,9 +19,12 @@ export default async function CoachLayout({
     redirect("/login");
   }
 
+  const userId = parseInt((session.user as { id?: string }).id ?? "0");
+  const unreadMessages = userId ? await getUnreadMessageCount(userId) : 0;
+
   return (
     <div className="min-h-screen bg-neutral-900">
-      <Sidebar />
+      <Sidebar unreadMessages={unreadMessages} />
       <main className="lg:pl-64">
         <div className="px-4 py-6 sm:px-6 lg:px-8">{children}</div>
       </main>

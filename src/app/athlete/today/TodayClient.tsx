@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Sun,
@@ -140,11 +140,13 @@ function ExerciseLogCard({
   sessionId,
   loggedSets,
   loggedSprints,
+  onStartRest,
 }: {
   exercise: SessionData["blocks"][0]["exercises"][0];
   sessionId: number;
   loggedSets: SessionData["loggedSets"];
   loggedSprints: SessionData["loggedSprints"];
+  onStartRest: (seconds: number, exerciseName: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [reps, setReps] = useState("");
@@ -205,6 +207,9 @@ function ExerciseLogCard({
       setDistance("");
       setTime("");
       setRpe("");
+      if (exercise.restSeconds && exercise.restSeconds > 0) {
+        onStartRest(exercise.restSeconds, exercise.exerciseName);
+      }
     });
   }
 
@@ -429,6 +434,45 @@ export default function TodayClient({
   const [mood, setMood] = useState(clamp5(initial?.mood, 4));
   const [note, setNote] = useState(session?.readiness?.note ?? "");
 
+  const [rest, setRest] = useState<{
+    secondsLeft: number;
+    total: number;
+    exerciseName: string;
+  } | null>(null);
+  const restIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  function startRest(seconds: number, exerciseName: string) {
+    if (restIntervalRef.current) clearInterval(restIntervalRef.current);
+    setRest({ secondsLeft: seconds, total: seconds, exerciseName });
+    restIntervalRef.current = setInterval(() => {
+      setRest((prev) => {
+        if (!prev) return null;
+        if (prev.secondsLeft <= 1) {
+          if (restIntervalRef.current) {
+            clearInterval(restIntervalRef.current);
+            restIntervalRef.current = null;
+          }
+          return null;
+        }
+        return { ...prev, secondsLeft: prev.secondsLeft - 1 };
+      });
+    }, 1000);
+  }
+
+  function cancelRest() {
+    if (restIntervalRef.current) {
+      clearInterval(restIntervalRef.current);
+      restIntervalRef.current = null;
+    }
+    setRest(null);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (restIntervalRef.current) clearInterval(restIntervalRef.current);
+    };
+  }, []);
+
   const hasReadiness = !!session?.readiness;
 
   async function handleSaveReadiness() {
@@ -483,6 +527,36 @@ export default function TodayClient({
 
   return (
     <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-6">
+      {rest && (
+        <div className="sticky top-2 z-30 bg-emerald-500/10 border border-emerald-500/30 backdrop-blur-sm rounded-xl p-4 flex items-center gap-4 shadow-lg">
+          <div className="text-3xl font-bold tabular-nums text-emerald-300">
+            {String(Math.floor(rest.secondsLeft / 60)).padStart(2, "0")}:
+            {String(rest.secondsLeft % 60).padStart(2, "0")}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs text-emerald-400 font-medium uppercase tracking-wider">
+              Resting
+            </div>
+            <div className="text-sm text-white truncate">
+              {rest.exerciseName}
+            </div>
+            <div className="h-1 w-full bg-emerald-900/50 rounded-full overflow-hidden mt-1.5">
+              <div
+                className="h-full bg-emerald-500 transition-all"
+                style={{
+                  width: `${(rest.secondsLeft / rest.total) * 100}%`,
+                }}
+              />
+            </div>
+          </div>
+          <button
+            onClick={cancelRest}
+            className="text-emerald-300 hover:text-white text-xs font-medium px-2 py-1 rounded hover:bg-emerald-500/20 transition-colors cursor-pointer"
+          >
+            Skip
+          </button>
+        </div>
+      )}
       <div>
         <h1 className="text-2xl font-bold text-white">
           {greeting}, {userName}
@@ -547,6 +621,7 @@ export default function TodayClient({
                 sessionId={session.id}
                 loggedSets={session.loggedSets}
                 loggedSprints={session.loggedSprints}
+                onStartRest={startRest}
               />
             ))}
           </div>
