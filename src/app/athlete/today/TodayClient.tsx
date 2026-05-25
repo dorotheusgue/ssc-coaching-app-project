@@ -60,6 +60,7 @@ type SessionData = {
       distance: number | null;
       time: number | null;
       restSeconds: number | null;
+      rpeTarget: number | null;
       notes: string | null;
       sortOrder: number;
     }>;
@@ -213,8 +214,11 @@ function ExerciseLogCard({
               {exercise.sets && `${exercise.sets} sets`}
               {exercise.reps && ` x ${exercise.reps} reps`}
               {exercise.load && ` @ ${exercise.load}`}
-              {exercise.distance && `${exercise.distance}m`}
-              {exercise.time && `${exercise.time}s`}
+              {exercise.distance && ` ${exercise.distance}m`}
+              {exercise.time && ` ${exercise.time}s`}
+              {exercise.rpeTarget !== null &&
+                exercise.rpeTarget !== undefined &&
+                ` · RPE ${exercise.rpeTarget}`}
               {exercise.restSeconds && ` | ${exercise.restSeconds}s rest`}
             </div>
           </div>

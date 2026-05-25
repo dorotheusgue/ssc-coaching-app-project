@@ -19,6 +19,7 @@ type Exercise = {
   id: number;
   name: string;
   category: string;
+  movementPattern: string | null;
   tags: unknown;
   description: string | null;
   videoUrl: string | null;
@@ -31,9 +32,28 @@ const CATEGORIES = [
   "sprint",
   "plyometric",
   "strength",
+  "olympic",
   "accessory",
+  "core",
+  "isometric",
+  "conditioning",
   "mobility",
   "warmup",
+  "recovery",
+] as const;
+
+const MOVEMENT_PATTERNS = [
+  "squat",
+  "hinge",
+  "push",
+  "pull",
+  "lunge",
+  "carry",
+  "sprint",
+  "jump",
+  "throw",
+  "rotation",
+  "other",
 ] as const;
 
 const TRACKING_TYPES = ["reps", "load", "distance", "time", "none"] as const;
@@ -42,9 +62,14 @@ const categoryColors: Record<string, string> = {
   sprint: "bg-blue-500/20 text-blue-400 border-blue-500/30",
   plyometric: "bg-purple-500/20 text-purple-400 border-purple-500/30",
   strength: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+  olympic: "bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-500/30",
   accessory: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+  core: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+  isometric: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+  conditioning: "bg-red-500/20 text-red-400 border-red-500/30",
   mobility: "bg-pink-500/20 text-pink-400 border-pink-500/30",
   warmup: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+  recovery: "bg-teal-500/20 text-teal-400 border-teal-500/30",
 };
 
 const trackingIcons: Record<string, React.ReactNode> = {
@@ -100,6 +125,7 @@ export default function ExerciseLibraryClient({
   const handleSave = async (data: {
     name: string;
     category: string;
+    movementPattern: string;
     tags: string[];
     description: string;
     trackingType: string;
@@ -204,13 +230,20 @@ export default function ExerciseLibraryClient({
               className="bg-neutral-800 border border-neutral-700 rounded-xl p-5 hover:border-neutral-600 transition-colors group"
             >
               <div className="flex items-start justify-between mb-3">
-                <span
-                  className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize ${
-                    categoryColors[exercise.category] ?? "bg-neutral-700 text-neutral-300 border-neutral-600"
-                  }`}
-                >
-                  {exercise.category}
-                </span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span
+                    className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize ${
+                      categoryColors[exercise.category] ?? "bg-neutral-700 text-neutral-300 border-neutral-600"
+                    }`}
+                  >
+                    {exercise.category}
+                  </span>
+                  {exercise.movementPattern && (
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium border bg-neutral-700/50 text-neutral-300 border-neutral-600 capitalize">
+                      {exercise.movementPattern}
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   {exercise.coachId === coachId && (
                     <>
@@ -293,6 +326,7 @@ function ExerciseModal({
   onSave: (data: {
     name: string;
     category: string;
+    movementPattern: string;
     tags: string[];
     description: string;
     trackingType: string;
@@ -301,6 +335,9 @@ function ExerciseModal({
 }) {
   const [name, setName] = useState(exercise?.name ?? "");
   const [category, setCategory] = useState(exercise?.category ?? "sprint");
+  const [movementPattern, setMovementPattern] = useState(
+    exercise?.movementPattern ?? ""
+  );
   const [tagsInput, setTagsInput] = useState(
     Array.isArray(exercise?.tags) ? (exercise.tags as string[]).join(", ") : ""
   );
@@ -314,7 +351,15 @@ function ExerciseModal({
       .split(",")
       .map((t) => t.trim())
       .filter(Boolean);
-    onSave({ name, category, tags, description, trackingType, videoUrl });
+    onSave({
+      name,
+      category,
+      movementPattern,
+      tags,
+      description,
+      trackingType,
+      videoUrl,
+    });
   };
 
   return (
@@ -346,21 +391,40 @@ function ExerciseModal({
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1.5">
-              Category
-            </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-3 py-2.5 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-            >
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat} className="capitalize">
-                  {cat}
-                </option>
-              ))}
-            </select>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                Category
+              </label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full px-3 py-2.5 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              >
+                {CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat} className="capitalize">
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                Movement Pattern
+              </label>
+              <select
+                value={movementPattern}
+                onChange={(e) => setMovementPattern(e.target.value)}
+                className="w-full px-3 py-2.5 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              >
+                <option value="">—</option>
+                {MOVEMENT_PATTERNS.map((mp) => (
+                  <option key={mp} value={mp} className="capitalize">
+                    {mp}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div>

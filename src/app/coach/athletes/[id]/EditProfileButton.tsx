@@ -2,10 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
-import { inviteAthleteAction } from "@/lib/actions/auth";
+import { updateAthleteProfileAction } from "@/lib/actions/auth";
 
 const SPORTS = [
   "Track & Field",
@@ -21,98 +21,70 @@ const SPORTS = [
   "Other",
 ] as const;
 
-export function InviteAthleteButton({ coachId }: { coachId: number }) {
+type Profile = {
+  userId: number;
+  sport: string | null;
+  event: string | null;
+  dateOfBirth: string | null;
+  height: number | null;
+  weight: number | null;
+  notes: string | null;
+};
+
+export function EditProfileButton({ profile }: { profile: Profile }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [sport, setSport] = useState("");
-  const [event, setEvent] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [height, setHeight] = useState("");
-  const [weight, setWeight] = useState("");
+  const [sport, setSport] = useState(profile.sport ?? "");
+  const [event, setEvent] = useState(profile.event ?? "");
+  const [dateOfBirth, setDateOfBirth] = useState(profile.dateOfBirth ?? "");
+  const [height, setHeight] = useState(
+    profile.height !== null ? String(profile.height) : ""
+  );
+  const [weight, setWeight] = useState(
+    profile.weight !== null ? String(profile.weight) : ""
+  );
+  const [notes, setNotes] = useState(profile.notes ?? "");
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
-
-  function reset() {
-    setName("");
-    setEmail("");
-    setSport("");
-    setEvent("");
-    setDateOfBirth("");
-    setHeight("");
-    setWeight("");
-    setError("");
-  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     const formData = new FormData();
-    formData.set("name", name);
-    formData.set("email", email);
-    formData.set("coachId", String(coachId));
+    formData.set("userId", String(profile.userId));
     formData.set("sport", sport);
     formData.set("event", event);
     formData.set("dateOfBirth", dateOfBirth);
     formData.set("height", height);
     formData.set("weight", weight);
+    formData.set("notes", notes);
     startTransition(async () => {
-      const result = await inviteAthleteAction(formData);
+      const result = await updateAthleteProfileAction(formData);
       if (!result.success) {
-        setError(result.error ?? "Failed to invite athlete");
+        setError(result.error ?? "Failed to update profile");
         return;
       }
       setOpen(false);
-      reset();
       router.refresh();
     });
   }
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
-        <Plus className="w-4 h-4 mr-2" />
-        Add Athlete
-      </Button>
-      <Modal
-        open={open}
-        onClose={() => {
-          setOpen(false);
-          reset();
-        }}
-        title="Invite Athlete"
+      <button
+        onClick={() => setOpen(true)}
+        className="p-1.5 rounded-lg hover:bg-neutral-700 text-neutral-400 hover:text-white transition-colors"
+        title="Edit profile"
       >
+        <Pencil className="w-4 h-4" />
+      </button>
+      <Modal open={open} onClose={() => setOpen(false)} title="Edit Athlete Profile">
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
               {error}
             </div>
           )}
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">
-              Name
-            </label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -149,7 +121,7 @@ export function InviteAthleteButton({ coachId }: { coachId: number }) {
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-sm font-medium text-neutral-300 mb-1">
-                Date of Birth
+                DOB
               </label>
               <input
                 type="date"
@@ -184,24 +156,24 @@ export function InviteAthleteButton({ coachId }: { coachId: number }) {
             </div>
           </div>
 
-          <p className="text-xs text-neutral-400">
-            Initial password is{" "}
-            <code className="text-neutral-200">changeme123</code>. Ask the
-            athlete to change it on first login.
-          </p>
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-1">
+              Notes
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+              className="w-full bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-y"
+            />
+          </div>
+
           <div className="flex justify-end gap-3 pt-2">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => {
-                setOpen(false);
-                reset();
-              }}
-            >
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Inviting..." : "Send Invite"}
+              {isPending ? "Saving..." : "Save"}
             </Button>
           </div>
         </form>

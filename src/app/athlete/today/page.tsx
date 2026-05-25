@@ -62,6 +62,7 @@ export default async function TodayPage() {
         distance: number | null;
         time: number | null;
         restSeconds: number | null;
+        rpeTarget: number | null;
         notes: string | null;
         sortOrder: number;
       }>;
@@ -85,6 +86,7 @@ export default async function TodayPage() {
             distance: blockExercises.distance,
             time: blockExercises.time,
             restSeconds: blockExercises.restSeconds,
+            rpeTarget: blockExercises.rpeTarget,
             notes: blockExercises.notes,
             sortOrder: blockExercises.sortOrder,
             exerciseName: exercises.name,

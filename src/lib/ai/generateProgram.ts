@@ -47,6 +47,7 @@ type GeneratedPlan = {
           distance?: number;
           time?: number;
           restSeconds?: number;
+          rpeTarget?: number;
           notes?: string;
         }>;
       }>;
@@ -100,6 +101,7 @@ const planSchema: Schema = {
                             distance: { type: SchemaType.NUMBER },
                             time: { type: SchemaType.NUMBER },
                             restSeconds: { type: SchemaType.INTEGER },
+                            rpeTarget: { type: SchemaType.NUMBER },
                             notes: { type: SchemaType.STRING },
                           },
                           required: ["exerciseName"],
@@ -209,7 +211,7 @@ CONSTRAINTS — hard rules:
 5. The "week" field is 1-based and PHASE-RELATIVE. If a phase has 4 weeks and Monday's session changes each week, emit 4 separate sessions for that day with week=1, 2, 3, 4. If Monday is the same every week of the phase, use week=0 (the system will replay it across all weeks of the phase). Default to week=0 ONLY when content is identical week-to-week.
 6. blockType must be one of: warmup, sprint, strength, accessory, notes. Group exercises into blocks that fit their type (warmups in warmup, lifts in strength, etc.).
 7. For sprint/distance exercises, populate "distance" (meters) and "time" (seconds) when given.
-8. For strength exercises, populate "sets", "reps" (string like "5" or "3-5"), and either "load" (string like "80kg" or "BW") or "percent1RM" (number).
+8. For strength exercises, populate "sets", "reps" (string like "5" or "3-5"), and either "load" (string like "80kg" or "BW") or "percent1RM" (number). If the source gives RPE (e.g. "RPE 8" or "@8"), populate "rpeTarget" (1–10) as well.
 9. Preserve the source's weekly layout, exercise order, sets, reps, and intensities exactly. If the source labels weeks (Week 1, Week 2, etc.) with different content, you MUST emit a session per week using the "week" field — do not collapse them.
 10. The current program already has ${existingPhases.length} phase(s); your phases must start at week ${baseWeekOffset + 1} or later.
 
@@ -335,6 +337,7 @@ ${exerciseLines}`;
             distance: ex.distance ?? null,
             time: ex.time ?? null,
             restSeconds: ex.restSeconds ?? null,
+            rpeTarget: ex.rpeTarget ?? null,
             notes: ex.notes ?? null,
             sortOrder: ei,
           });

@@ -36,6 +36,8 @@ export async function PATCH(
   const update: Record<string, unknown> = {};
   if (body.name !== undefined) update.name = body.name;
   if (body.category !== undefined) update.category = body.category;
+  if (body.movementPattern !== undefined)
+    update.movementPattern = body.movementPattern || null;
   if (body.tags !== undefined)
     update.tags = Array.isArray(body.tags) ? body.tags : [];
   if (body.description !== undefined)

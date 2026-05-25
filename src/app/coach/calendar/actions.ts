@@ -42,6 +42,13 @@ export async function assignProgramAction(formData: FormData) {
     .where(eq(phases.programId, programId))
     .orderBy(phases.sortOrder);
 
+  // Normalize so the program's first phase always starts on the selected
+  // startDate, regardless of the phase's stored startWeek number (which may
+  // be inherited from a source program, e.g. AI import).
+  const minStartWeek = programPhases.length
+    ? Math.min(...programPhases.map((p) => Math.max(1, p.startWeek)))
+    : 1;
+
   for (const phase of programPhases) {
     const templates = await db
       .select()
@@ -66,7 +73,7 @@ export async function assignProgramAction(formData: FormData) {
           : [startWeek + template.week - 1].filter((w) => w <= endWeek);
 
       for (const week of weeksForTemplate) {
-        const offsetDays = (week - 1) * 7 + (dayInWeek - 1);
+        const offsetDays = (week - minStartWeek) * 7 + (dayInWeek - 1);
         const sessionDate = addDays(startDate, offsetDays);
 
         await db.insert(assignedSessions).values({

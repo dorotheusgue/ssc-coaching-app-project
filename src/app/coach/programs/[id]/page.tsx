@@ -78,6 +78,7 @@ export default async function ProgramBuilderPage({
           distance: blockExercises.distance,
           time: blockExercises.time,
           restSeconds: blockExercises.restSeconds,
+          rpeTarget: blockExercises.rpeTarget,
           notes: blockExercises.notes,
           sortOrder: blockExercises.sortOrder,
           exerciseName: exercises.name,

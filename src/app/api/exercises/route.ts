@@ -15,7 +15,15 @@ export async function POST(request: Request) {
   const coachId = parseInt((session.user as { id: string }).id);
 
   const body = await request.json();
-  const { name, category, tags, description, trackingType, videoUrl } = body;
+  const {
+    name,
+    category,
+    movementPattern,
+    tags,
+    description,
+    trackingType,
+    videoUrl,
+  } = body;
 
   if (!name || !category || !trackingType) {
     return NextResponse.json(
@@ -29,6 +37,7 @@ export async function POST(request: Request) {
     .values({
       name,
       category,
+      movementPattern: movementPattern || null,
       tags: Array.isArray(tags) ? tags : [],
       description: description || null,
       trackingType,

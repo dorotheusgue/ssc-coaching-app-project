@@ -79,6 +79,7 @@ type BlockExercise = {
   distance: number | null;
   time: number | null;
   restSeconds: number | null;
+  rpeTarget: number | null;
   notes: string | null;
   sortOrder: number;
   exerciseName: string | null;
@@ -343,6 +344,7 @@ export default function ProgramBuilderClient({
       distance: number | null;
       time: number | null;
       restSeconds: number | null;
+      rpeTarget: number | null;
       notes: string | null;
     }
   ) => {
@@ -370,9 +372,13 @@ export default function ProgramBuilderClient({
   const phaseTemplates = templates.filter(
     (t) => t.phaseId === activePhaseId
   );
-  const visibleTemplates = phaseTemplates.filter(
-    (t) => t.week === activeWeek
-  );
+  // "All weeks" (activeWeek=0): show everything in the phase.
+  // Specific week N: show sessions for that week, plus week=0 sessions
+  // (which repeat across every week of the phase).
+  const visibleTemplates =
+    activeWeek === 0
+      ? phaseTemplates
+      : phaseTemplates.filter((t) => t.week === activeWeek || t.week === 0);
 
   const filteredExercises = allExercises.filter(
     (e) =>
@@ -696,6 +702,7 @@ function ExerciseEditModal({
       distance: number | null;
       time: number | null;
       restSeconds: number | null;
+      rpeTarget: number | null;
       notes: string | null;
     }
   ) => Promise<void>;
@@ -713,6 +720,9 @@ function ExerciseEditModal({
   );
   const [restSeconds, setRestSeconds] = useState<string>(
     blockExercise.restSeconds?.toString() ?? ""
+  );
+  const [rpeTarget, setRpeTarget] = useState<string>(
+    blockExercise.rpeTarget?.toString() ?? ""
   );
   const [notes, setNotes] = useState<string>(blockExercise.notes ?? "");
   const [saving, setSaving] = useState(false);
@@ -734,6 +744,7 @@ function ExerciseEditModal({
         distance: parseNum(distance),
         time: parseNum(time),
         restSeconds: parseNum(restSeconds),
+        rpeTarget: parseNum(rpeTarget),
         notes: notes.trim() || null,
       });
     } finally {
@@ -820,6 +831,21 @@ function ExerciseEditModal({
               step="0.01"
               value={time}
               onChange={(e) => setTime(e.target.value)}
+              className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-xs font-medium text-neutral-400 mb-1">
+              RPE Target (1–10)
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={10}
+              step="0.5"
+              value={rpeTarget}
+              onChange={(e) => setRpeTarget(e.target.value)}
+              placeholder="e.g. 8 for hard but 2 reps in reserve"
               className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
@@ -1042,9 +1068,23 @@ function PhaseView({
                         key={template.id}
                         className="bg-neutral-900 border border-neutral-700 rounded-lg p-2"
                       >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-medium text-white">
+                        <div className="flex items-center justify-between mb-2 gap-1">
+                          <span className="text-xs font-medium text-white truncate flex items-center gap-1.5">
                             {template.label}
+                            <span
+                              className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                                template.week === 0
+                                  ? "bg-neutral-700 text-neutral-300"
+                                  : "bg-emerald-500/20 text-emerald-300"
+                              }`}
+                              title={
+                                template.week === 0
+                                  ? "Repeats every week of this phase"
+                                  : `Only on week ${template.week}`
+                              }
+                            >
+                              {template.week === 0 ? "every wk" : `wk ${template.week}`}
+                            </span>
                           </span>
                           <button
                             onClick={() => onDeleteSession(template.id)}

@@ -213,6 +213,7 @@ export async function addExerciseToBlock(data: {
   distance?: number;
   time?: number;
   restSeconds?: number;
+  rpeTarget?: number;
   notes?: string;
 }) {
   const session = await auth();
@@ -236,6 +237,7 @@ export async function addExerciseToBlock(data: {
       distance: data.distance ?? null,
       time: data.time ?? null,
       restSeconds: data.restSeconds ?? null,
+      rpeTarget: data.rpeTarget ?? null,
       notes: data.notes ?? null,
       sortOrder: maxSort.length,
     })
@@ -261,6 +263,7 @@ export async function updateBlockExercise(
     distance?: number | null;
     time?: number | null;
     restSeconds?: number | null;
+    rpeTarget?: number | null;
     notes?: string | null;
   }
 ) {

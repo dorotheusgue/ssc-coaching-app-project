@@ -11,9 +11,10 @@ import {
   programAssignments,
 } from "@/db/schema";
 import { eq, and, desc, gte } from "drizzle-orm";
-import { ArrowLeft, User, Clock, Trophy } from "lucide-react";
+import { ArrowLeft, User, Trophy } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { AthleteDetailClient } from "./AthleteDetailClient";
+import { EditProfileButton } from "./EditProfileButton";
 
 export default async function AthleteDetailPage({
   params,
@@ -140,7 +141,20 @@ export default async function AthleteDetailPage({
             <User className="w-8 h-8 text-emerald-500" />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold text-white">{athlete.name}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-white">{athlete.name}</h1>
+              <EditProfileButton
+                profile={{
+                  userId: athlete.id,
+                  sport: athlete.sport,
+                  event: athlete.event,
+                  dateOfBirth: athlete.dateOfBirth,
+                  height: athlete.height,
+                  weight: athlete.weight,
+                  notes: athlete.notes,
+                }}
+              />
+            </div>
             <p className="text-neutral-400 mt-1">{athlete.email}</p>
             <div className="flex flex-wrap gap-4 mt-4">
               {athlete.sport && (
