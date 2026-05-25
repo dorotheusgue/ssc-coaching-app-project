@@ -134,12 +134,27 @@ export default async function TodayPage() {
 
   const userName = session.user.name ?? "Athlete";
 
+  const lastReadiness = await db
+    .select({
+      sleepQuality: readinessEntries.sleepQuality,
+      fatigue: readinessEntries.fatigue,
+      soreness: readinessEntries.soreness,
+      stress: readinessEntries.stress,
+      mood: readinessEntries.mood,
+    })
+    .from(readinessEntries)
+    .where(eq(readinessEntries.athleteId, athleteId))
+    .orderBy(desc(readinessEntries.date))
+    .limit(1)
+    .get();
+
   return (
     <TodayClient
       session={sessionData}
       athleteId={athleteId}
       userName={userName}
       today={today}
+      lastReadiness={lastReadiness ?? null}
     />
   );
 }

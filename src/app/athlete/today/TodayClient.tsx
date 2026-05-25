@@ -9,7 +9,6 @@ import {
   Heart,
   Brain,
   CheckCircle2,
-  Circle,
   ChevronDown,
   ChevronUp,
   Plus,
@@ -17,6 +16,7 @@ import {
   Timer,
   Ruler,
   Weight,
+  Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -88,36 +88,49 @@ type SessionData = {
   }>;
 };
 
-function ReadinessSlider({
+function ReadinessButtons({
   label,
   value,
   onChange,
   icon: Icon,
   color,
+  lowLabel,
+  highLabel,
 }: {
   label: string;
   value: number;
   onChange: (v: number) => void;
   icon: React.ComponentType<{ className?: string }>;
   color: string;
+  lowLabel: string;
+  highLabel: string;
 }) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Icon className={`w-4 h-4 ${color}`} />
-          <span className="text-sm text-neutral-300">{label}</span>
-        </div>
-        <span className="text-sm font-semibold text-white">{value}/10</span>
+    <div className="space-y-1.5">
+      <div className="flex items-center gap-2">
+        <Icon className={`w-4 h-4 ${color}`} />
+        <span className="text-sm text-neutral-300">{label}</span>
       </div>
-      <input
-        type="range"
-        min="1"
-        max="10"
-        value={value}
-        onChange={(e) => onChange(parseInt(e.target.value))}
-        className="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-      />
+      <div className="flex gap-1.5">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button
+            key={n}
+            type="button"
+            onClick={() => onChange(n)}
+            className={`flex-1 py-2 rounded-lg text-sm font-semibold border transition-colors cursor-pointer ${
+              value === n
+                ? "bg-emerald-500 border-emerald-500 text-white"
+                : "bg-neutral-700/50 border-neutral-700 text-neutral-300 hover:bg-neutral-700"
+            }`}
+          >
+            {n}
+          </button>
+        ))}
+      </div>
+      <div className="flex justify-between text-[10px] text-neutral-500 px-1">
+        <span>{lowLabel}</span>
+        <span>{highLabel}</span>
+      </div>
     </div>
   );
 }
@@ -133,7 +146,7 @@ function ExerciseLogCard({
   loggedSets: SessionData["loggedSets"];
   loggedSprints: SessionData["loggedSprints"];
 }) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const [reps, setReps] = useState("");
   const [load, setLoad] = useState("");
   const [distance, setDistance] = useState("");
@@ -227,7 +240,12 @@ function ExerciseLogCard({
           <Badge color={completedSets >= (exercise.sets ?? 1) ? "emerald" : "neutral"}>
             {completedSets}/{exercise.sets ?? 1}
           </Badge>
-          {expanded ? (
+          {!expanded && completedSets === 0 ? (
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-400">
+              <Play className="w-3.5 h-3.5" />
+              Start
+            </span>
+          ) : expanded ? (
             <ChevronUp className="w-4 h-4 text-neutral-400" />
           ) : (
             <ChevronDown className="w-4 h-4 text-neutral-400" />
@@ -312,25 +330,103 @@ function ExerciseLogCard({
   );
 }
 
+function SessionProgress({ session }: { session: SessionData }) {
+  const totalExercises = session.blocks.reduce(
+    (sum, b) => sum + b.exercises.length,
+    0
+  );
+  const completedExercises = session.blocks.reduce((sum, b) => {
+    return (
+      sum +
+      b.exercises.filter((ex) => {
+        const isSprint =
+          ex.trackingType === "time" || ex.trackingType === "distance";
+        const logs = isSprint
+          ? session.loggedSprints.filter((s) => s.blockExerciseId === ex.id)
+          : session.loggedSets.filter((s) => s.blockExerciseId === ex.id);
+        const done = logs.filter((l) => l.completed).length;
+        return done >= (ex.sets ?? 1);
+      }).length
+    );
+  }, 0);
+  const pct =
+    totalExercises === 0
+      ? 0
+      : Math.round((completedExercises / totalExercises) * 100);
+
+  return (
+    <div className="bg-neutral-800 rounded-xl border border-neutral-700 p-6">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+          <Zap className="w-5 h-5 text-yellow-400" />
+          {session.label}
+        </h2>
+        <Badge
+          color={
+            session.status === "completed"
+              ? "emerald"
+              : session.status === "in_progress"
+                ? "yellow"
+                : "neutral"
+          }
+        >
+          {session.status}
+        </Badge>
+      </div>
+      {session.notes && (
+        <p className="text-neutral-400 text-sm mb-3">{session.notes}</p>
+      )}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-neutral-400">
+            {completedExercises} of {totalExercises} exercises
+          </span>
+          <span className="text-emerald-400 font-medium">{pct}%</span>
+        </div>
+        <div className="h-2 w-full bg-neutral-700 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-emerald-500 transition-all"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function TodayClient({
   session,
   athleteId,
   userName,
   today,
+  lastReadiness,
 }: {
   session: SessionData | null;
   athleteId: number;
   userName: string;
   today: string;
+  lastReadiness: {
+    sleepQuality: number;
+    fatigue: number;
+    soreness: number;
+    stress: number;
+    mood: number;
+  } | null;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const [sleep, setSleep] = useState(session?.readiness?.sleepQuality ?? 7);
-  const [fatigue, setFatigue] = useState(session?.readiness?.fatigue ?? 5);
-  const [soreness, setSoreness] = useState(session?.readiness?.soreness ?? 5);
-  const [stress, setStress] = useState(session?.readiness?.stress ?? 5);
-  const [mood, setMood] = useState(session?.readiness?.mood ?? 7);
+  // Use today's entry if present, else prefill from last entry, else neutral 3.
+  const clamp5 = (v: number | null | undefined, fallback: number) =>
+    v === null || v === undefined
+      ? fallback
+      : Math.max(1, Math.min(5, v));
+  const initial = session?.readiness ?? lastReadiness ?? null;
+  const [sleep, setSleep] = useState(clamp5(initial?.sleepQuality, 4));
+  const [fatigue, setFatigue] = useState(clamp5(initial?.fatigue, 3));
+  const [soreness, setSoreness] = useState(clamp5(initial?.soreness, 3));
+  const [stress, setStress] = useState(clamp5(initial?.stress, 3));
+  const [mood, setMood] = useState(clamp5(initial?.mood, 4));
   const [note, setNote] = useState(session?.readiness?.note ?? "");
 
   const hasReadiness = !!session?.readiness;
@@ -400,28 +496,7 @@ export default function TodayClient({
         </p>
       </div>
 
-      <div className="bg-neutral-800 rounded-xl border border-neutral-700 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-            <Zap className="w-5 h-5 text-yellow-400" />
-            {session.label}
-          </h2>
-          <Badge
-            color={
-              session.status === "completed"
-                ? "emerald"
-                : session.status === "in_progress"
-                  ? "yellow"
-                  : "neutral"
-            }
-          >
-            {session.status}
-          </Badge>
-        </div>
-        {session.notes && (
-          <p className="text-neutral-400 text-sm mb-4">{session.notes}</p>
-        )}
-      </div>
+      <SessionProgress session={session} />
 
       <Card title="Readiness Check">
         {hasReadiness ? (
@@ -430,12 +505,12 @@ export default function TodayClient({
             <span>Readiness recorded</span>
           </div>
         ) : (
-          <div className="space-y-5">
-            <ReadinessSlider label="Sleep Quality" value={sleep} onChange={setSleep} icon={Moon} color="text-blue-400" />
-            <ReadinessSlider label="Energy / Fatigue" value={11 - fatigue} onChange={(v) => setFatigue(11 - v)} icon={Zap} color="text-yellow-400" />
-            <ReadinessSlider label="Muscle Soreness" value={11 - soreness} onChange={(v) => setSoreness(11 - v)} icon={Heart} color="text-red-400" />
-            <ReadinessSlider label="Stress Level" value={11 - stress} onChange={(v) => setStress(11 - v)} icon={Brain} color="text-purple-400" />
-            <ReadinessSlider label="Mood" value={mood} onChange={setMood} icon={Sun} color="text-emerald-400" />
+          <div className="space-y-4">
+            <ReadinessButtons label="Sleep Quality" value={sleep} onChange={setSleep} icon={Moon} color="text-blue-400" lowLabel="Poor" highLabel="Great" />
+            <ReadinessButtons label="Energy" value={6 - fatigue} onChange={(v) => setFatigue(6 - v)} icon={Zap} color="text-yellow-400" lowLabel="Drained" highLabel="Fresh" />
+            <ReadinessButtons label="Soreness" value={6 - soreness} onChange={(v) => setSoreness(6 - v)} icon={Heart} color="text-red-400" lowLabel="Very sore" highLabel="None" />
+            <ReadinessButtons label="Stress" value={6 - stress} onChange={(v) => setStress(6 - v)} icon={Brain} color="text-purple-400" lowLabel="High" highLabel="Calm" />
+            <ReadinessButtons label="Mood" value={mood} onChange={setMood} icon={Sun} color="text-emerald-400" lowLabel="Low" highLabel="Great" />
             <div>
               <label className="block text-sm text-neutral-300 mb-1">Notes</label>
               <textarea
