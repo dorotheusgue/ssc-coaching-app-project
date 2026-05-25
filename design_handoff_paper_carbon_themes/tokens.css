@@ -1,0 +1,89 @@
+/* ============================================================================
+ * SSC — Paper + Carbon themes
+ *
+ * Tailwind v4 token definitions. Values are EXACT — mirror the HTML prototype
+ * (see ./prototype/prototype-core.jsx → PROTO_THEMES.paper / .carbon).
+ *
+ * Paper is the default. Carbon activates when `<html data-theme="carbon">`.
+ * Switch at runtime via ThemeProvider.tsx (sets the attribute on <html>).
+ *
+ * Naming convention:
+ *   --color-bg       — page background
+ *   --color-surface  — card / cell background (sits on top of bg)
+ *   --color-ink      — primary foreground text
+ *   --color-mute     — secondary / muted text
+ *   --color-faint    — tertiary text (rarely used)
+ *   --color-line     — hairline divider (0.09 alpha of ink)
+ *   --color-rule     — heavier rule (0.20 alpha of ink)
+ *   --color-hover    — hover wash on interactive surfaces
+ *   --color-chart    — chart stroke / data fill
+ *   --color-chart-mute — secondary chart line
+ *   --color-accent   — brand accent. Currently resolves to --color-ink
+ *                       (monochrome direction). Don't introduce a saturated
+ *                       hue without an explicit design decision.
+ * ============================================================================ */
+
+@theme {
+  /* ─── Paper (default light) ─────────────────────────────────────────── */
+  --color-bg:         #f3f2ee;
+  --color-surface:    #ffffff;
+  --color-ink:        #0e0e0d;
+  --color-mute:       #88877f;
+  --color-faint:      #c3c1b8;
+  --color-line:       rgba(14, 14, 13, 0.09);
+  --color-rule:       rgba(14, 14, 13, 0.20);
+  --color-hover:      rgba(14, 14, 13, 0.045);
+  --color-chart:      #0e0e0d;
+  --color-chart-mute: rgba(14, 14, 13, 0.16);
+  --color-accent:     #0e0e0d;
+
+  /* ─── Type ──────────────────────────────────────────────────────────── */
+  --font-sans: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  /* ─── Spacing scale (rem-based, matches our compact density) ────────── */
+  --spacing-cell-pad: 0.875rem;  /* 14px */
+  --spacing-cell-gap: 0.625rem;  /* 10px */
+  --spacing-row:      2.25rem;   /* 36px */
+
+  /* ─── Radii ─────────────────────────────────────────────────────────── */
+  /* Intentionally 0 — square corners throughout. */
+  --radius-none: 0;
+
+  /* ─── Borders ───────────────────────────────────────────────────────── */
+  --border-hairline: 1px;
+}
+
+/* ─── Carbon (dark) ─────────────────────────────────────────────────────── */
+[data-theme="carbon"] {
+  --color-bg:         #0a0a09;
+  --color-surface:    #131312;
+  --color-ink:        #efece3;
+  --color-mute:       #7f7e77;
+  --color-faint:      #393937;
+  --color-line:       rgba(239, 236, 227, 0.10);
+  --color-rule:       rgba(239, 236, 227, 0.24);
+  --color-hover:      rgba(239, 236, 227, 0.05);
+  --color-chart:      #efece3;
+  --color-chart-mute: rgba(239, 236, 227, 0.22);
+  --color-accent:     #efece3;
+
+  color-scheme: dark;
+}
+
+/* Explicit paper selector for symmetry (idempotent with the @theme defaults) */
+[data-theme="paper"] {
+  --color-bg:         #f3f2ee;
+  --color-surface:    #ffffff;
+  --color-ink:        #0e0e0d;
+  --color-mute:       #88877f;
+  --color-faint:      #c3c1b8;
+  --color-line:       rgba(14, 14, 13, 0.09);
+  --color-rule:       rgba(14, 14, 13, 0.20);
+  --color-hover:      rgba(14, 14, 13, 0.045);
+  --color-chart:      #0e0e0d;
+  --color-chart-mute: rgba(14, 14, 13, 0.16);
+  --color-accent:     #0e0e0d;
+
+  color-scheme: light;
+}

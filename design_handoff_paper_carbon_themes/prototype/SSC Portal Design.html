@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>SSC · Portal Design</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Funnel+Display:wght@300;400;500;600&family=Funnel+Sans:wght@300;400;500;600&family=Host+Grotesk:wght@300;400;500;600&family=Archivo+Narrow:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600&display=swap" rel="stylesheet" />
+<link href="https://api.fontshare.com/v2/css?f[]=switzer@300,400,500,600&f[]=general-sans@400,500,600&display=swap" rel="stylesheet" />
+
+<style>
+  :root { color-scheme: light; }
+  html, body { margin: 0; padding: 0; height: 100%; background: #f0eee9;
+    font-family: "Inter Tight", system-ui, sans-serif; color: #0e0e0d; }
+  body { overflow: hidden; }
+  *, *::before, *::after { box-sizing: border-box; }
+  button { font-family: inherit; }
+  /* Keep artboard contents from blurring */
+  [data-dc-slot] .dc-card { background: transparent; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+  // Defensive: clear any stale design-canvas viewport state so the page always
+  // opens with the camera at content origin (some past sessions ended up at
+  // y≈20000 which leaves the viewport blank).
+  try {
+    Object.keys(localStorage).filter(k => k.startsWith('dc-viewport')).forEach(k => localStorage.removeItem(k));
+  } catch {}
+</script>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="prototype-core.jsx"></script>
+<script type="text/babel" src="prototype-screens-v2.jsx"></script>
+<script type="text/babel" src="prototype-screens.jsx"></script>
+
+<script type="text/babel" data-presets="env,react">
+  const { useState } = React;
+
+  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "density": "compact",
+    "fontPair": "inter-jb",
+    "accent": "ink",
+    "layout": "gridded"
+  }/*EDITMODE-END*/;
+
+  // ─── Artboard wrapper ──────────────────────────────────────────────────────
+  // Renders the full prototype at 1280×820 inside a design-canvas card,
+  // each pinned to a different theme.
+  function ArtboardProto({ themeName, t, startScreen }) {
+    return (
+      <div style={{ width: '100%', height: '100%' }}>
+        <Prototype
+          themeName={themeName}
+          density={t.density}
+          fontPair={t.fontPair}
+          accentName={t.accent}
+          layout={t.layout}
+          startScreen={startScreen}
+        />
+      </div>
+    );
+  }
+
+  function App() {
+    const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+    // Per-direction starting screen so the design canvas presents a coherent tour
+    const [aScreen, setAScreen] = useState('today');
+    const [bScreen, setBScreen] = useState('dashboard');
+    const [cScreen, setCScreen] = useState('athletes');
+    const [signinScreen, setSigninScreen] = useState('signin');
+
+    return (
+      <>
+        <DesignCanvas>
+          <DCSection id="new" title="New · from latest repo update">
+            <DCArtboard id="new-exercises" label="Coach · Exercise library" width={1280} height={820}>
+              <ArtboardProto themeName="paper" t={t} startScreen="exercises" />
+            </DCArtboard>
+            <DCArtboard id="new-coach-media" label="Coach · Media review" width={1280} height={820}>
+              <ArtboardProto themeName="paper" t={t} startScreen="coachMedia" />
+            </DCArtboard>
+            <DCArtboard id="new-athlete-media" label="Athlete · Media" width={1280} height={820}>
+              <ArtboardProto themeName="paper" t={t} startScreen="athleteMedia" />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="auth" title="Sign-in">
+            <DCArtboard id="signin-paper"  label="Paper"  width={900} height={620}>
+              <ArtboardProto themeName="paper"  t={t} startScreen="signin" />
+            </DCArtboard>
+            <DCArtboard id="signin-bone"   label="Bone"   width={900} height={620}>
+              <ArtboardProto themeName="bone"   t={t} startScreen="signin" />
+            </DCArtboard>
+            <DCArtboard id="signin-carbon" label="Carbon" width={900} height={620}>
+              <ArtboardProto themeName="carbon" t={t} startScreen="signin" />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="athlete" title="Athlete · Today">
+            <DCArtboard id="today-paper"  label="Paper"  width={1280} height={820}>
+              <ArtboardProto themeName="paper"  t={t} startScreen="today" />
+            </DCArtboard>
+            <DCArtboard id="today-bone"   label="Bone"   width={1280} height={820}>
+              <ArtboardProto themeName="bone"   t={t} startScreen="today" />
+            </DCArtboard>
+            <DCArtboard id="today-carbon" label="Carbon" width={1280} height={820}>
+              <ArtboardProto themeName="carbon" t={t} startScreen="today" />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="athlete-rest" title="Athlete · the rest">
+            <DCArtboard id="cal-paper"  label="Calendar" width={1280} height={820}>
+              <ArtboardProto themeName="paper" t={t} startScreen="calendar" />
+            </DCArtboard>
+            <DCArtboard id="prog-paper" label="Progress" width={1280} height={820}>
+              <ArtboardProto themeName="paper" t={t} startScreen="progress" />
+            </DCArtboard>
+            <DCArtboard id="media-ath-paper" label="Media · upload" width={1280} height={820}>
+              <ArtboardProto themeName="paper" t={t} startScreen="athleteMedia" />
+            </DCArtboard>
+            <DCArtboard id="msg-paper"  label="Messages" width={1280} height={820}>
+              <ArtboardProto themeName="paper" t={t} startScreen="messages" />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="coach" title="Coach · Dashboard">
+            <DCArtboard id="dash-paper"  label="Paper"  width={1280} height={820}>
+              <ArtboardProto themeName="paper"  t={t} startScreen="dashboard" />
+            </DCArtboard>
+            <DCArtboard id="dash-bone"   label="Bone"   width={1280} height={820}>
+              <ArtboardProto themeName="bone"   t={t} startScreen="dashboard" />
+            </DCArtboard>
+            <DCArtboard id="dash-carbon" label="Carbon" width={1280} height={820}>
+              <ArtboardProto themeName="carbon" t={t} startScreen="dashboard" />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="coach-rest" title="Coach · the rest">
+            <DCArtboard id="ath-paper"       label="Athletes"        width={1280} height={820}>
+              <ArtboardProto themeName="paper" t={t} startScreen="athletes" />
+            </DCArtboard>
+            <DCArtboard id="prog-list-paper" label="Programs"        width={1280} height={820}>
+              <ArtboardProto themeName="paper" t={t} startScreen="programs" />
+            </DCArtboard>
+            <DCArtboard id="ex-paper"        label="Exercises (NEW)" width={1280} height={820}>
+              <ArtboardProto themeName="paper" t={t} startScreen="exercises" />
+            </DCArtboard>
+            <DCArtboard id="builder-paper"   label="Program builder" width={1280} height={820}>
+              <ArtboardProto themeName="paper" t={t} startScreen="builder" />
+            </DCArtboard>
+            <DCArtboard id="cal-coach-paper" label="Calendar"        width={1280} height={820}>
+              <ArtboardProto themeName="paper" t={t} startScreen="calendar" />
+            </DCArtboard>
+            <DCArtboard id="media-co-paper"  label="Media review (NEW)" width={1280} height={820}>
+              <ArtboardProto themeName="paper" t={t} startScreen="coachMedia" />
+            </DCArtboard>
+            <DCArtboard id="msg-coach-paper" label="Messages"        width={1280} height={820}>
+              <ArtboardProto themeName="paper" t={t} startScreen="messages" />
+            </DCArtboard>
+          </DCSection>
+        </DesignCanvas>
+
+        <TweaksPanel>
+          <TweakSection label="Type" />
+          <TweakSelect
+            label="Font pairing"
+            value={t.fontPair}
+            options={[
+              { value: 'inter-jb',  label: 'Inter Tight · JetBrains' },
+              { value: 'switzer',   label: 'Switzer · JetBrains  ◆ tight grotesk' },
+              { value: 'general',   label: 'General Sans · JetBrains' },
+              { value: 'funnel',    label: 'Funnel Display · JetBrains  ◆ editorial' },
+              { value: 'host',      label: 'Host Grotesk · JetBrains  ◆ modern' },
+              { value: 'bricolage', label: 'Bricolage · JetBrains  ◆ sharp' },
+              { value: 'archivo-n', label: 'Archivo Narrow · JetBrains  ◆ condensed' },
+              { value: 'geist',     label: 'Geist · Geist Mono' },
+            ]}
+            onChange={(v) => setTweak('fontPair', v)}
+          />
+
+          <TweakSection label="Layout" />
+          <TweakRadio
+            label="Density"
+            value={t.density}
+            options={['compact', 'regular', 'airy']}
+            onChange={(v) => setTweak('density', v)}
+          />
+          <TweakRadio
+            label="Grid"
+            value={t.layout}
+            options={['gridded', 'asymmetric']}
+            onChange={(v) => setTweak('layout', v)}
+          />
+
+          <TweakSection label="Accent" />
+          <TweakSelect
+            label="Accent role"
+            value={t.accent}
+            options={[
+              { value: 'default', label: 'Direction default' },
+              { value: 'ink',     label: 'Ink (monochrome)' },
+              { value: 'ember',   label: 'Ember' },
+              { value: 'cobalt',  label: 'Cobalt' },
+              { value: 'moss',    label: 'Moss' },
+            ]}
+            onChange={(v) => setTweak('accent', v)}
+          />
+        </TweaksPanel>
+      </>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
