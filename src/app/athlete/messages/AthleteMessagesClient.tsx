@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Send, Paperclip, X, Loader2, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { sendMessageAction, markReadAction } from "@/app/coach/messages/actions";
+import { useToast } from "@/components/ui/Toast";
 
 type Message = {
  id: number;
@@ -41,6 +42,7 @@ export default function AthleteMessagesClient({
  const [isPending, startTransition] = useTransition();
  const messagesEndRef = useRef<HTMLDivElement>(null);
  const fileInputRef = useRef<HTMLInputElement>(null);
+ const toast = useToast();
 
  useEffect(() => {
  messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -57,7 +59,7 @@ export default function AthleteMessagesClient({
  e.target.value = "";
  if (!file) return;
  if (file.size > 50_000_000) {
- alert("File too large (max 50 MB).");
+ toast.error("File too large (max 50 MB).");
  return;
  }
  setUploading(true);
@@ -70,7 +72,7 @@ export default function AthleteMessagesClient({
  setAttachment({ url: data.url, type: data.fileType, name: data.fileName });
  } catch (err) {
  console.error(err);
- alert("Upload failed.");
+ toast.error("Upload failed.");
  } finally {
  setUploading(false);
  }

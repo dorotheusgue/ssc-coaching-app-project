@@ -17,6 +17,7 @@ import {
  Dumbbell,
  Bookmark,
  BookOpen,
+ Printer,
 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { getVideoThumbnail } from "@/lib/videoThumb";
@@ -463,7 +464,15 @@ export default function ProgramBuilderClient({
  </div>
  )}
  </div>
- <div className="flex gap-2">
+ <div className="flex gap-2 print:hidden">
+ <Button
+ variant="ghost"
+ onClick={() => window.print()}
+ title="Print or save as PDF"
+ >
+ <Printer className="w-4 h-4 mr-2" />
+ Print
+ </Button>
  <Button
  variant="secondary"
  onClick={() => setAiOpen((v) => !v)}

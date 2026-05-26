@@ -118,7 +118,7 @@ export default function Sidebar({
  </div>
  )}
 
- <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-bg border-r border-line">
+ <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-bg border-r border-line print:hidden">
  {sidebarContent}
  </aside>
  </>

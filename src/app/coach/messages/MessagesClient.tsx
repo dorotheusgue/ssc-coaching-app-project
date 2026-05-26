@@ -10,6 +10,7 @@ import {
  X,
  Loader2,
  Dumbbell,
+ Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
@@ -18,6 +19,7 @@ import {
  createConversationAction,
  markReadAction,
 } from "./actions";
+import { useToast } from "@/components/ui/Toast";
 
 type Conversation = {
  id: number;
@@ -25,6 +27,7 @@ type Conversation = {
  athleteName: string;
  lastMessageAt: Date | null;
  lastMessage: string;
+ unreadCount: number;
 };
 
 type Athlete = { id: number; name: string };
@@ -63,6 +66,8 @@ export default function MessagesClient({
  } | null>(null);
  const [uploading, setUploading] = useState(false);
  const [showNewConvo, setShowNewConvo] = useState(false);
+ const [convoSearch, setConvoSearch] = useState("");
+ const toast = useToast();
  const [isPending, startTransition] = useTransition();
  const messagesEndRef = useRef<HTMLDivElement>(null);
  const fileInputRef = useRef<HTMLInputElement>(null);
@@ -86,7 +91,7 @@ export default function MessagesClient({
  e.target.value = "";
  if (!file) return;
  if (file.size > 50_000_000) {
- alert("File too large (max 50 MB).");
+ toast.error("File too large (max 50 MB).");
  return;
  }
  setUploading(true);
@@ -99,7 +104,7 @@ export default function MessagesClient({
  setAttachment({ url: data.url, type: data.fileType, name: data.fileName });
  } catch (err) {
  console.error(err);
- alert("Upload failed.");
+ toast.error("Upload failed.");
  } finally {
  setUploading(false);
  }
@@ -159,7 +164,8 @@ export default function MessagesClient({
  return (
  <div className="h-[calc(100vh-4rem)] flex">
  <div className="w-80 border-r border-line flex flex-col bg-surface">
- <div className="p-4 border-b border-line flex items-center justify-between">
+ <div className="p-4 border-b border-line space-y-3">
+ <div className="flex items-center justify-between">
  <h2 className="text-lg font-semibold text-ink">Messages</h2>
  <button
  onClick={() => setShowNewConvo(true)}
@@ -168,13 +174,34 @@ export default function MessagesClient({
  <Plus className="w-5 h-5" />
  </button>
  </div>
+ <div className="relative">
+ <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-faint" />
+ <input
+ type="text"
+ value={convoSearch}
+ onChange={(e) => setConvoSearch(e.target.value)}
+ placeholder="Search athletes..."
+ className="w-full pl-8 pr-3 py-1.5 bg-bg border border-line text-ink text-sm placeholder:text-faint focus:outline-none focus:ring-1 focus:ring-ink"
+ />
+ </div>
+ </div>
  <div className="flex-1 overflow-y-auto">
  {conversations.length === 0 ? (
  <div className="p-4 text-center text-faint text-sm">
  No conversations yet
  </div>
  ) : (
- conversations.map((c) => (
+ conversations
+ .filter((c) =>
+ !convoSearch ||
+ c.athleteName
+ .toLowerCase()
+ .includes(convoSearch.toLowerCase()) ||
+ c.lastMessage
+ .toLowerCase()
+ .includes(convoSearch.toLowerCase())
+ )
+ .map((c) => (
  <button
  key={c.id}
  onClick={() => setSelectedConvo(c.id)}
@@ -183,14 +210,19 @@ export default function MessagesClient({
  }`}
  >
  <div className="flex items-center gap-3">
- <div className="w-10 h-10 bg-ink/20 flex items-center justify-center text-ink font-semibold text-sm">
+ <div className="w-10 h-10 bg-ink/20 flex items-center justify-center text-ink font-semibold text-sm relative">
  {c.athleteName.charAt(0)}
+ {c.unreadCount > 0 && (
+ <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-ink text-bg text-[10px] font-bold flex items-center justify-center">
+ {c.unreadCount > 9 ? "9+" : c.unreadCount}
+ </span>
+ )}
  </div>
  <div className="flex-1 min-w-0">
- <div className="text-ink font-medium text-sm truncate">
+ <div className={`font-medium text-sm truncate ${c.unreadCount > 0 ? "text-ink" : "text-ink"}`}>
  {c.athleteName}
  </div>
- <div className="text-mute text-xs truncate">
+ <div className={`text-xs truncate ${c.unreadCount > 0 ? "text-ink font-medium" : "text-mute"}`}>
  {c.lastMessage || "No messages yet"}
  </div>
  </div>

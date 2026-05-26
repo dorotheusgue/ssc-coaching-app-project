@@ -12,6 +12,11 @@ type Step = {
  done: boolean;
 };
 
+function readDismissed(): boolean {
+ if (typeof window === "undefined") return false;
+ return window.localStorage.getItem(STORAGE_KEY) === "1";
+}
+
 export function OnboardingChecklist({
  hasAthlete,
  hasProgram,
@@ -22,14 +27,11 @@ export function OnboardingChecklist({
  hasAssignment: boolean;
 }) {
  const [mounted, setMounted] = useState(false);
- const [dismissed, setDismissed] = useState(false);
+ const [dismissed, setDismissed] = useState(readDismissed);
 
  useEffect(() => {
+ // eslint-disable-next-line react-hooks/set-state-in-effect
  setMounted(true);
- setDismissed(
- typeof window !== "undefined" &&
- window.localStorage.getItem(STORAGE_KEY) === "1"
- );
  }, []);
 
  const steps: Step[] = [

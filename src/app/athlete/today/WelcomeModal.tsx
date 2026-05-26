@@ -1,21 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Activity, Dumbbell, MessageSquare, Timer } from "lucide-react";
 
 const STORAGE_KEY = "ssc-athlete-welcome-dismissed";
 
-export function WelcomeModal({ enabled }: { enabled: boolean }) {
- const [open, setOpen] = useState(false);
+function initialOpen(enabled: boolean): boolean {
+ if (!enabled) return false;
+ if (typeof window === "undefined") return false;
+ return window.localStorage.getItem(STORAGE_KEY) !== "1";
+}
 
- useEffect(() => {
- if (!enabled) return;
- if (typeof window === "undefined") return;
- if (window.localStorage.getItem(STORAGE_KEY) === "1") return;
- setOpen(true);
- }, [enabled]);
+export function WelcomeModal({ enabled }: { enabled: boolean }) {
+ const [open, setOpen] = useState(() => initialOpen(enabled));
 
  function dismiss() {
  if (typeof window !== "undefined") {

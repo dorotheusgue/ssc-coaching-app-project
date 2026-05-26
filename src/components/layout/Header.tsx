@@ -15,7 +15,7 @@ interface HeaderProps {
 
 function Header({ user }: HeaderProps) {
  return (
- <header className="sticky top-0 z-30 bg-bg/80 backdrop-blur-md border-b border-rule">
+ <header className="sticky top-0 z-30 bg-bg/80 backdrop-blur-md border-b border-rule print:hidden">
  <div className="flex items-center justify-between px-4 sm:px-6 py-3">
  <h1 className="text-lg font-bold text-ink tracking-tight">SSC</h1>
  <div className="flex items-center gap-3">

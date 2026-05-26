@@ -166,7 +166,7 @@ export default function RegisterPage() {
  autoComplete="off"
  />
  <p className="text-xs text-faint mt-1">
- Required by your team admin. Skip if you weren't given one.
+ Required by your team admin. Skip if you weren&apos;t given one.
  </p>
  </div>
  )}

@@ -19,3 +19,20 @@ html, body {
 }
 
 [data-tabular] { font-variant-numeric: tabular-nums; }
+
+/* Print: drop chrome, force readable contrast even in Carbon theme. */
+@media print {
+ html, body {
+ background: white !important;
+ color: black !important;
+ }
+ *, *::before, *::after {
+ background: transparent !important;
+ color: black !important;
+ box-shadow: none !important;
+ }
+ a { color: inherit; text-decoration: none; }
+ .print\:hidden { display: none !important; }
+ .print\:block { display: block !important; }
+}
+

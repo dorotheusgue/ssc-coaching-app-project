@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { conversations, users, athleteProfiles, messages } from "@/db/schema";
-import { eq, and, desc, or } from "drizzle-orm";
+import { eq, and, desc, isNull, ne, sql } from "drizzle-orm";
 import MessagesClient from "./MessagesClient";
 
 export default async function CoachMessagesPage() {
@@ -37,7 +37,21 @@ export default async function CoachMessagesPage() {
  .orderBy(desc(messages.createdAt))
  .limit(1)
  .get();
- return { ...c, lastMessage: lastMsg?.text ?? "" };
+ const [unread] = await db
+ .select({ value: sql<number>`count(*)` })
+ .from(messages)
+ .where(
+ and(
+ eq(messages.conversationId, c.id),
+ ne(messages.senderId, coachId),
+ isNull(messages.readAt)
+ )
+ );
+ return {
+ ...c,
+ lastMessage: lastMsg?.text ?? "",
+ unreadCount: Number(unread?.value ?? 0),
+ };
  })
  );
 
